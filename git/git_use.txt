@@ -14,6 +14,7 @@ git remote add origin  http://github.com/xxxxx
 git remote rm <主机名>
 git fetch <远程主机名>
 git status
+<<<<<<< HEAD
 A: 你本地新增的文件（服务器上没有）.
 C: 文件的一个新拷贝.
 D: 你本地删除的文件（服务器上还在）.
@@ -23,6 +24,8 @@ T: 文件的类型被修改了。
 U: 文件没有被合并(你需要完成合并才能进行提交)。
 X: 未知状态(很可能是遇到git的bug了，你可以向git提交bug report)。
 commit
+=======
+>>>>>>> 3abb37d346cf2a0d0cba1d2118af1330dc011d5a
 git diff
 git log
 git pull <远程主机名> <远程分支名>:<本地分支名>
