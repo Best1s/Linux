@@ -4,13 +4,18 @@ git config --global user.name ""
 git config --global user.email ""
 git config --list
 git branch
+git branch -d
 git checkout
+git merge
 git add
 git commit -m ""
-git push lxx bxx  txx 
+git remote
 git remote add origin  http://github.com/xxxxx
-git remote rm origin
-git log 
+git remote rm <主机名>
+git fetch <远程主机名>
 git status
-git pull origin master
+git diff
+git log
+git pull <远程主机名> <远程分支名>:<本地分支名>
+git push <远程主机名> <本地分支名>:<远程分支名> 
 git clone http://github.com/xxxxx
