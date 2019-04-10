@@ -52,12 +52,12 @@ replicate-wild-ignore-table=mysql.% #忽略哪个库到那个表
 
 slave主从
 CHANGE MASTER TO
-MASTER_HOST='47.106.198.229',
+MASTER_HOST='',
 MASTER_PORT=3306,
 MASTER_USER='slave',
-MASTER_PASSWORD='slave0031',
-MASTER_LOG_FILE='master-bin.000059',
-MASTER_LOG_POS=706574808;
+MASTER_PASSWORD='',
+MASTER_LOG_FILE='',
+MASTER_LOG_POS=;
 
 
 log_timestamps = SYSTEM
