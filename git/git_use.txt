@@ -4,13 +4,27 @@ git config --global user.name ""
 git config --global user.email ""
 git config --list
 git branch
+git branch -d
 git checkout
+git merge
 git add
 git commit -m ""
-git push lxx bxx  txx 
+git remote
 git remote add origin  http://github.com/xxxxx
-git remote rm origin
-git log 
+git remote rm <主机名>
+git fetch <远程主机名>
 git status
-git pull origin master
+A: 你本地新增的文件（服务器上没有）.
+C: 文件的一个新拷贝.
+D: 你本地删除的文件（服务器上还在）.
+M: 文件的内容或者mode被修改了.
+R: 文件名被修改了。
+T: 文件的类型被修改了。
+U: 文件没有被合并(你需要完成合并才能进行提交)。
+X: 未知状态(很可能是遇到git的bug了，你可以向git提交bug report)。
+commit
+git diff
+git log
+git pull <远程主机名> <远程分支名>:<本地分支名>
+git push <远程主机名> <本地分支名>:<远程分支名> 
 git clone http://github.com/xxxxx
