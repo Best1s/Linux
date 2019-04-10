@@ -1,0 +1,67 @@
+1 mysql 创建用户的三种方式        mysqld  --initialize-insecure  #初始化msyql
+
+CREATE USER user[IDENTIFIED BY [PASSWORD] 'password'],
+[user[IDENTIFIED BY [PASSWORD] 'password']]...
+
+INSERT INTO mysql.user(Host,User,Password,ssl_cipher,x509_issuer,x509_subject) VALUES('%','newuser1',PASSWORD('123456'),'','','')
+FLUSH PRIVILEGES
+GRANT priv_type ON database.table
+TO user[IDENTIFIED BY [PASSWORD] 'password']
+[,user [IDENTIFIED BY [PASSWORD] 'password']...]
+
+set sql_mode =‘STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION‘;
+
+
+
+2删除用户
+DROP USER user[,user]...
+
+DROP USER 'newuser1'@'%
+
+DELETE FROM mysql.user WHERE Host = '%' AND User = 'admin'
+3 修改密码
+mysqladmin -u -username -p password "new_password"
+
+修改USER表
+UPDATE user SET Password = PASSWORD('123') WHERE USER = 'myuser'
+
+SET语句修改
+SET PASSWORD = PASSWORD("123");
+
+修改其他用户密码：
+SET PASSWORD FOR 'myuser'@'%'=PASSWORD("123456")
+
+GRANT SELECT ON *.* TO 'test3'@'%' IDENTIFIED BY '123'
+
+4 忘记密码的解决方案
+mysqld --skip-grant-tables
+mysqld-nt --skip-grant-tables
+net start mysql --skip-grant-tables
+
+查询数据库大小
+select TABLE_SCHEMA, concat(truncate(sum(data_length)/1024/1024,2),' MB') as data_size,
+concat(truncate(sum(index_length)/1024/1024,2),'MB') as index_size
+from information_schema.tables
+group by TABLE_SCHEMA
+order by data_length desc;
+
+binlog-ignore-db=xxxx  #忽略同步库
+binlog-do-db=xxx  #需要同同步的库不在内不同步
+replicate-wild-do-table=db_name.%  #只复制到那个库的那个表
+replicate-wild-ignore-table=mysql.% #忽略哪个库到那个表
+
+slave主从
+CHANGE MASTER TO
+MASTER_HOST='47.106.198.229',
+MASTER_PORT=3306,
+MASTER_USER='slave',
+MASTER_PASSWORD='slave0031',
+MASTER_LOG_FILE='master-bin.000059',
+MASTER_LOG_POS=706574808;
+
+
+log_timestamps = SYSTEM
+grant replication slave on *.* to 'rep1'@'%' identified by 'mysql';
+
+xtrabackup  mysqldump  innobackupex  区别？
+--single-transaction  #innodb可以不锁表  其他引擎不确定

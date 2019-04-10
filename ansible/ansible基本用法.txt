@@ -1,0 +1,69 @@
+#在/etc/ansible/host 下先把组名 客户端配置好
+#配置免密登录或者密码登录
+#ansible基本用法
+ansible xxxx -m ping   操作xxxx组  all为hosts文件中所有主机 -m指定 ping模块
+
+shell > ansible Client -m ping     # 操作 Client 组 ( all 为操作 hosts 文件中所有主机 )，
+192.168.12.129 | SUCCESS => {
+"changed": false, 
+"ping": "pong"
+}
+
+# -i          指定 hosts 文件位置
+# -u username 指定 SSH 连接的用户名
+# -k          指定远程用户密码
+# -f          指定并发数
+# -s          如需要 root 权限执行时使用 ( 连接用户不是 root 时 )
+# -K          -s 时，-K 输入 root 密码
+
+远程命令模块（ command / script / shell ）  command不支持管道
+
+ansible xxxx -m script -a "/xxx/xx.sh"    -a 指定模块参数
+ansible xxxx -m command -a "free -h"
+
+#shell模块 的功能是执行远程主机上的 shell 脚本文件，支持管道符。
+shell > ansible Client -m shell -a "/home/test.sh"           # 执行远程脚本
+
+#script模块
+shell > ansible Client -m script -a "/home/test.sh 12 34"    # 远程执行本地脚本
+
+#copy模块
+# 向 Client 组中主机拷贝 test.sh 到 /tmp 下，属主、组为 root ，权限为 0755
+shell > ansible Client -m copy -a "src=/home/test.sh dest=/tmp/ owner=root group=root mode=0755" 
+
+#stat 模块（获取远程文件状态信息，atime/ctime/mtime/md5/uid/gid 等信息）
+shell > ansible Client -m stat -a "path=/etc/syctl.conf"
+
+#yum 模块（软件包管理）
+shell > ansible Client -m yum -a "name=curl state=latest"
+
+#cron 模块（远程主机 crontab 配置）
+shell > ansible Client -m cron -a "name='check dirs' hour='5,2' job='ls -alh > /dev/null'"
+ 
+#service 模块（远程主机系统服务管理）
+shell > ansible Client -m service -a "name=nginx state=stopped"
+shell > ansible Client -m service -a "name=nginx state=restarted"
+shell > ansible Client -m service -a "name=nginx state=reloaded"
+
+#user 服务模块（远程主机用户管理）
+shell > ansible Client -m user -a "name=wang comment='user wang'"
+shell > ansible Client -m user -a "name=wang state=absent remove=yes"    # 添加删除用户
+
+#
+ 
+#get_url 模块（实现在远程主机下载指定 URL 到本地，支持 sha256sum 文件校验）
+shell > ansible Client -m get_url -a "url=http://www.baidu.com dest=/tmp/index.html mode=0440 force=yes"
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+ssh-keygen -t rsa -C "xxx@xxx.com"
+ssh -T git@github.com
+git config --global user.name ""
+git config --global user.email ""
+git config --list
+git branch
+git checkout
+git add
+git commit -m ""
+git push lxx bxx  txx 
+git remote add origin  http://github.com/xxxxx
+git remote rm origin
+git log 
+git status
+git pull origin master
+git clone http://github.com/xxxxx

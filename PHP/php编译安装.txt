@@ -1,0 +1,2 @@
+yum -y install bzip2-devel libmcrypt-deve
+yum install bzip2-devel curl-devel db4-devel  libjpeg-devel libpng-devel libXpm-devel gmp-devel libc-client-devel openldap-devel unixODBC-devel net-snmp-devel mysql-devel sqlite-devel aspell-devel libxml2-devel libxslt-devel  libxslt-devel
