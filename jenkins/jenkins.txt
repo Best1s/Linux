@@ -1,0 +1,6 @@
+1，	部署jdk。http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+2，	部署tomcat。https://tomcat.apache.org/download-80.cgi
+3，	部署Jenkins。 http://jenkins-ci.org/  #download  Generic Java package(.war)  
+#把war包放入tomcat的appweb 目录 执行tomca/bin/startup.sh  可以同时监控下logs/catalina.out
+4，	配置Jenkins。ip:8080
+5: 启动Jenkins

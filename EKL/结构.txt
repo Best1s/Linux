@@ -1,0 +1,3 @@
+1:Logstash部署至服务主机，对各个服务的日志进行采集、过滤、推送。
+2:Elasticsearch存储Logstash传送的结构化数据，提供给Kibana。
+3:Kibana提供用户UIweb页面进行，数据展示和分析形成图表等。

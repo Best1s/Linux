@@ -1,0 +1,16 @@
+#php.ini 中开启 Zend OPcache  编译安装PHP的时候加上--enable-opcache
+opcache.enable=1
+opcache.memory_consumption=512
+opcache.validate_timestamps=1
+opcache.revalidate_freq=60
+opcache.interned_strings_buffer=40
+opcache.max_accelerated_files=4000
+opcache.fast_shutdown=1
+zend_extension="opcache.so"
+#php-fpm
+pm = dynamic
+pm.max_children = 30   //设置子进程最大数值
+pm.start_servers = 10   //php-fpm启动起始进程数
+pm.min_spare_servers = 10   //php-fpm的最小空闲进程数
+pm.max_spare_servers = 24   //php-fpm的最大空闲进程数
+pm.max_requests = 500   //所有子进程重启时间
