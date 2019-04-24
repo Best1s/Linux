@@ -20,3 +20,34 @@ certutil -A -n "GeoTrust SSL CA" -t "C,," -d ~/.certs -i ~/.certs/163.crt
 certutil -L -d /root/.certs
  
 certutil -A -n "GeoTrust SSL CA - G3" -t "Pu,Pu,Pu" -d ~/.certs/ -i ~/.certs/163.crt
+
+#!/bin/bash
+#send mail
+
+FILE=/tmp/mailtmp.txt
+echo "$3" >$FILE
+dos2unix -k $FILE ###解决了发送的邮件内容变成附件的问题
+
+mail -s "$2" "$1" < $FILE >>/tmp/mailx.log 2>&1
+
+#!/bin/bash
+#send note
+user=
+key=
+number=
+text="$1 $2"
+$3 >/dev/null 2>$1
+echo "note send" >> /tmp/mailx.log
+curl -d "Uid=$user&Key=$key&smsMob=$number&smsText=$text" "http://utf8.api.smschinese.cn/?" >> /tmp/mailx.log 2>&1
+#http://utf8.api.smschinese.cn/?Uid=本站用户名&Key=接口安全秘钥&smsMob=手机号码&smsText=验证码:8888
+
+#/usr/bin/bash
+#Wechat receve alert
+#variable text is tittle
+#variable desp is text
+addr="https://sc.ftqq.com/SCU48988T5fae09c6a3961f05aae95dc3108e37985cb596f02ab31.send"
+a=$3 > /dev/null 2>&1
+#get https://sc.ftqq.com/SCU48988T5fae09c6a3961f05aae95dc3108e37985cb596f02ab31.send?text=$1&desp=$2
+curl -d "text=$1&desp=$2" $addr > /dev/null 2>&1
+
+
