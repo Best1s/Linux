@@ -1,5 +1,18 @@
 #在/etc/ansible/host 下先把组名 客户端配置好
-#配置免密登录或者密码登录
+#ansible密码登录         
+密码需要保存在文件内不安全 
+/etc/ansible/host文件添加
+[组名]   不用[]是机器名  支持主机列表正则匹配
+ip [ansible_ssh_port=port][ansible_ssh_user=user] [ansible_ssh_pass=passwd]
+/etc/ansible/ansible.cfg 更改参数
+host_key_checking = False
+
+#ansible免密登录
+配置免密登录
+ssh-kengen -t rsa
+ssh-copy-id 需要免登录的IP
+
+#
 #ansible基本用法
 ansible xxxx -m ping   操作xxxx组  all为hosts文件中所有主机 -m指定 ping模块
 
@@ -53,6 +66,9 @@ shell > ansible Client -m user -a "name=wang state=absent remove=yes"    # 添�
  
 #get_url 模块（实现在远程主机下载指定 URL 到本地，支持 sha256sum 文件校验）
 shell > ansible Client -m get_url -a "url=http://www.baidu.com dest=/tmp/index.html mode=0440 force=yes"
+
+
+file模块 copy模块 yum模块  useradd userdel usermod模块  service模块  cron模块 get_url
 
 
 

@@ -1,0 +1,24 @@
+#playbook由一个或多个'plays'组成 内容以'plays'元素的列表
+#play内容被称为tasks 即任务， 一个任务是对一个ansible模块的调用
+
+playbooks组成：
+Target section:     要执行Playbook主机名或组
+Variable section:	运行是的变量
+Task section:		远程主机上执行的任务列表
+Handler section:	定义task执行完成后需要调用的任务
+其对应目录层为五个：
+vars
+tasks
+handlers
+files
+template
+
+playbooks核心元素为：
+Tasks:
+Variable:
+Templates；
+Handler:
+Roles:
+
+Playboosk基于YAML格式
+

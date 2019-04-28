@@ -1,4 +1,5 @@
 #/bin/bash
+#dep pcre-devel  zlib-devel
 yum -y install yum-utils
 cp ./nginx.repo /etc/yum.repos.d/
 yum-config-manager --enable nginx-mainline
