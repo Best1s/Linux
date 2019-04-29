@@ -11,7 +11,7 @@ TO user[IDENTIFIED BY [PASSWORD] 'password']
 
 set sql_mode =‘STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION‘;
 
-
+skip-grant-tables
 
 2删除用户
 DROP USER user[,user]...
@@ -23,7 +23,8 @@ DELETE FROM mysql.user WHERE Host = '%' AND User = 'admin'
 mysqladmin -u -username -p password "new_password"
 
 修改USER表
-UPDATE user SET Password = PASSWORD('123') WHERE USER = 'myuser'
+UPDATE user SET Password = PASSWORD('123') WHERE USER = 'myuser'  5.7后没有password 字段
+
 
 SET语句修改
 SET PASSWORD = PASSWORD("123");

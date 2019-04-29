@@ -7,7 +7,7 @@ git branch
 git branch -d
 git checkout
 git merge
-git add
+git add  文件名  #  撤销add   git reset HEAD <filename>  # 撤销修改      git checkout fileName
 git commit -m ""
 git remote
 git remote add origin  http://github.com/xxxxx
@@ -31,3 +31,18 @@ git log
 git pull <远程主机名> <远程分支名>:<本地分支名>
 git push <远程主机名> <本地分支名>:<远程分支名> 
 git clone http://github.com/xxxxx
+
+#git clone 仓库内单个文件或者目录
+git init xxx &&cd xxx //初始化一个目录
+git config core.sparsecheckout true  //设置允许克隆子目录
+
+echo '需要克隆的路径' >> .git/info/sparse-checkout  //设置要克隆的仓库的子目录路径 //空格别漏
+
+git remote add origin git@github.com:名/仓库名.git  //换成你要克隆的项目git地址和仓库
+
+git pull origin master //下载
+=======
+#版本回滚
+git log
+git reset	--hard   版本号
+强制提交 git push -f origin master      reset  回滚不可逆  可以用revert      git revert

@@ -1,2 +1,17 @@
 yum -y install bzip2-devel libmcrypt-deve
-yum install bzip2-devel curl-devel db4-devel  libjpeg-devel libpng-devel libXpm-devel gmp-devel libc-client-devel openldap-devel unixODBC-devel net-snmp-devel mysql-devel sqlite-devel aspell-devel libxml2-devel libxslt-devel  libxslt-devel
+yum -y install bzip2-devel curl-devel db4-devel  
+yum -y install libjpeg-devel libpng-devel libXpm-devel gmp-devel libc-client-devel openldap-devel unixODBC-devel net-snmp-devel mysql-devel sqlite-devel aspell-devel libxml2-devel libxslt-devel  libxslt-devel
+yum -y install gcc-c++  m4 autoconf
+
+#1.开启curl扩展，需提前yum -y install libcurl  curl-devel
+
+#2.开启bz2扩展，需提前yum -y install bzip2 bzip2-devel
+
+#3.开启openssl扩展，需提前yum -y openssl openssl-devel
+
+#4.开启gd扩展，需提前yum -y libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel
+
+#5.开启xml扩展,需提前yum -y libxml2 libxml2-devel
+
+#php-7.0后不在支持 mcrypt  安装mcrypt扩展需要提前安装  yum -y install libmcrypt-devel
+
