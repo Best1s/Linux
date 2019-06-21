@@ -1,3 +1,20 @@
+yum -y install bzip2-devel libmcrypt-deve
+yum -y install bzip2-devel curl-devel db4-devel  
+yum -y install libjpeg-devel libpng-devel libXpm-devel gmp-devel libc-client-devel openldap-devel unixODBC-devel net-snmp-devel mysql-devel sqlite-devel aspell-devel libxml2-devel libxslt-devel  libxslt-devel
+yum -y install gcc-c++  m4 autoconf
+if [ $OS_RL == 1 ];then
+	yum install -y gcc gcc-c++ make sudo autoconf libtool-ltdl-devel gd-devel \
+       freetype-devel libxml2-devel libjpeg-devel libpng-devel openssl-devel xz \
+       curl-devel patch libmcrypt-devel libmhash-devel ncurses-devel bzip2 \
+       libcap-devel ntp sysklogd diffutils sendmail iptables unzip cmake wget logrotate \
+	re2c bison icu libicu libicu-devel net-tools psmisc vim-enhanced
+else
+	apt-get install -y gcc g++ make autoconf libltdl-dev libgd2-xpm-dev \
+       libfreetype6 libfreetype6-dev libxml2-dev libjpeg-dev libpng12-dev \
+       libcurl4-openssl-dev libssl-dev patch libmcrypt-dev libmhash-dev \
+       libncurses5-dev  libreadline-dev bzip2 libcap-dev ntpdate \
+       diffutils exim4 iptables unzip sudo cmake re2c bison \
+       libicu-dev net-tools psmisc xz libzip libzip-devel
 #!/bin/bash
 PHP_INSTALL_PATH=/usr/local/webserver/php-7.2.16
 PHP_CONFIG_PATH=$PHP_INSTALL_PATH/bin/php-config
@@ -30,14 +47,23 @@ cd $swoole_dir
 $PHP_INSTALL_PATH/bin/phpize && ./configure --with-php-config=$PHP_CONFIG_PATH && make && make install && echo "swoole install successful" >> $PHP_INSTALL_PATH/install.log
 cd $mcrypt_dir
 $PHP_INSTALL_PATH/bin/phpize && ./configure --with-php-config=$PHP_CONFIG_PATH && make && make install && echo "mcrypt install successful" >> $PHP_INSTALL_PATH/install.log
-#if [ -f $PHP_INSTALL_PATH/etc/php.ini ]
-#	then
-#      		 echo "php.ini exit!" >> $PHP_INSTALL_PATH/install.log
-#	else
-# 		cp $php_dir/php.ini-production $PHP_INSTALL_PATH/etc/
-#if
-sed -i "887i extension=swoole.so" $php_dir/php.ini-production
-sed -i "887i extension=redis.so" $php_dir/php.ini-production
-sed -i "887i extension=mcrypt.so" $php_dir/php.ini-production
+if [ -f $PHP_INSTALL_PATH/etc/php.ini ]
+	then
+      		 echo "php.ini exit!" >> $PHP_INSTALL_PATH/install.log
+	else
+		cp $php_dir/php.ini-production $PHP_INSTALL_PATH/etc/php.ini
+if
+sed -i "887i extension=swoole.so" $PHP_INSTALL_PATH/etc/php.ini
+sed -i "887i extension=redis.so" $PHP_INSTALL_PATH/etc/php.ini
+sed -i "887i extension=mcrypt.so" $PHP_INSTALL_PATH/etc/php.ini
+opcache.enable=1
+opcache.memory_consumption=512
+opcache.validate_timestamps=1
+opcache.revalidate_freq=60
+opcache.interned_strings_buffer=40
+opcache.max_accelerated_files=4000
+opcache.fast_shutdown=1
+zend_extension="opcache.so"
+
 echo "install end"
 

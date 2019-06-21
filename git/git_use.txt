@@ -1,5 +1,7 @@
+﻿#git 基本使用
 ssh-keygen -t rsa -C "xxx@xxx.com"
 ssh -T git@github.com
+git init
 git config --global user.name ""
 git config --global user.email ""
 git config --list
@@ -7,7 +9,7 @@ git branch
 git branch -d
 git checkout
 git merge
-git add  文件名  #  撤销add   git reset HEAD <filename>  # 撤销修改      git checkout fileName
+git add  文件名  # 撤销add   git reset HEAD <filename>  #撤销修改      git checkout fileName
 git commit -m ""
 git remote
 git remote add origin  http://github.com/xxxxx
@@ -24,12 +26,12 @@ T: 文件的类型被修改了。
 U: 文件没有被合并(你需要完成合并才能进行提交)。
 X: 未知状态(很可能是遇到git的bug了，你可以向git提交bug report)。
 commit
-=======
+=================================================
 >>>>>>> 3abb37d346cf2a0d0cba1d2118af1330dc011d5a
 git diff
 git log
-git pull <远程主机名> <远程分支名>:<本地分支名>
-git push <远程主机名> <本地分支名>:<远程分支名> 
+git pull <远程主机名> <远程分支名>:<本地分支名>  #拉取
+git push <远程主机名> <本地分支名>:<远程分支名>  #代码上推	
 git clone http://github.com/xxxxx
 
 #git clone 仓库内单个文件或者目录
@@ -41,8 +43,10 @@ echo '需要克隆的路径' >> .git/info/sparse-checkout  //设置要克隆的�
 git remote add origin git@github.com:名/仓库名.git  //换成你要克隆的项目git地址和仓库
 
 git pull origin master //下载
-=======
+==========================================
 #版本回滚
 git log
-git reset	--hard   版本号
-强制提交 git push -f origin master      reset  回滚不可逆  可以用revert      git revert
+git reset	--hard   需要回滚版本号
+强制提交 git push -f origin master  #本地版本比仓库版本旧 需要强制提交    
+git reset #可以生成新的旧版本 保留后面的版本
+使用“git revert -n 版本号”反做，并使用“git commit -m 版本名”提交：#注意： 这里可能会出现冲突，那么需要手动修改冲突的文件。而且要git add 文件名。

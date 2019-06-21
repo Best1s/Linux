@@ -1,4 +1,4 @@
-1 mysql 创建用户的三种方式        mysqld  --initialize-insecure  #初始化msyql
+﻿1 mysql 创建用户的三种方式        mysqld  --initialize-insecure  #初始化msyql
 
 CREATE USER user[IDENTIFIED BY [PASSWORD] 'password'],
 [user[IDENTIFIED BY [PASSWORD] 'password']]...
@@ -66,3 +66,6 @@ grant replication slave on *.* to 'rep1'@'%' identified by 'mysql';
 
 xtrabackup  mysqldump  innobackupex  区别？
 --single-transaction  #innodb可以不锁表  其他引擎不确定
+
+从二进制文件查询 事件语句
+mysqlbinlog --base64-output=decode-rows -vv bin_file|grep -A 20 'pos_num'

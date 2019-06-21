@@ -1,4 +1,4 @@
-yum -y install bzip2-devel libmcrypt-deve
+﻿yum -y install bzip2-devel libmcrypt-deve
 yum -y install bzip2-devel curl-devel db4-devel  
 yum -y install libjpeg-devel libpng-devel libXpm-devel gmp-devel libc-client-devel openldap-devel unixODBC-devel net-snmp-devel mysql-devel sqlite-devel aspell-devel libxml2-devel libxslt-devel  libxslt-devel
 yum -y install gcc-c++  m4 autoconf
@@ -15,3 +15,43 @@ yum -y install gcc-c++  m4 autoconf
 
 #php-7.0后不在支持 mcrypt  安装mcrypt扩展需要提前安装  yum -y install libmcrypt-devel
 
+#待研究
+#yum install -y opernssl openssl-devel pcre pcre-devel wget curl pcre pcre-devel zlib zlib-devel gcc gcc-c++
+yum install zlib libxml libjpeg freetype libpng gd curl libconv zlib-devel libxml2-devel libjpeg-devel freetype-devel libpng-devel gd-devel curl-devel 
+yum install -y libxml2 libxml2-devel openssl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel libmcrypt libmcrypt-devel mcrypt mhash
+yum install -y gcc gcc-c++ libxml2 libxml2-devel autoconf libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel zlib zlib-devel glibc glibc-devel glib2 glib2-devel curl curl-devel libxslt-devel openssl-devel ncurses-devel
+yum install -y gmp-devel  libgmp-dev  readline-devel bzip2-devel php70w-bcmath
+
+is64bit=`getconf LONG_BIT`
+
+grep -qi 'debian\|ubuntu' /etc/issue && OS_RL=2
+if [ $OS_RL == 1 ]; then
+    R6=0
+    R7=0
+    grep -q 'release 6' /etc/redhat-release && R6=1
+    grep -q 'release 7' /etc/redhat-release && R7=1
+fi
+X86=0
+if uname -m | grep -q 'x86_64'; then
+    X86=1
+fi
+
+if [ $R7==1 ]; then 
+	systemctl stop firewalld
+#/etc/init.d/iptables stop
+	sed -i "s/^SELINUX\=enforcing/SELINUX\=disabled/g" /etc/selinux/config
+fi
+
+if [ $OS_RL == 1 ];then
+	yum install -y gcc gcc-c++ make sudo autoconf libtool-ltdl-devel gd-devel \
+       freetype-devel libxml2-devel libjpeg-devel libpng-devel openssl-devel xz \
+       curl-devel patch libmcrypt-devel libmhash-devel ncurses-devel bzip2 \
+       libcap-devel ntp sysklogd diffutils sendmail iptables unzip cmake wget logrotate \
+	re2c bison icu libicu libicu-devel net-tools psmisc vim-enhanced
+else
+	apt-get install -y gcc g++ make autoconf libltdl-dev libgd2-xpm-dev \
+       libfreetype6 libfreetype6-dev libxml2-dev libjpeg-dev libpng12-dev \
+       libcurl4-openssl-dev libssl-dev patch libmcrypt-dev libmhash-dev \
+       libncurses5-dev  libreadline-dev bzip2 libcap-dev ntpdate \
+       diffutils exim4 iptables unzip sudo cmake re2c bison \
+       libicu-dev net-tools psmisc xz libzip libzip-devel
