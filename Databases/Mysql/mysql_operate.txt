@@ -69,3 +69,14 @@ xtrabackup  mysqldump  innobackupex  区别？
 
 从二进制文件查询 事件语句
 mysqlbinlog --base64-output=decode-rows -vv bin_file|grep -A 20 'pos_num'
+
+从二进制文件中恢复数据
+mysqlbinlog /xxx/xxx/logbin.xxxxx --stop-pos=xxxxx |mysql -uroot -p
+
+定位效率低的查询：
+show processlist\G  或 show full processlist; 
+对于查询时间长、运行状态（State 列）是“Sending data”、“Copying to tmp table”、
+“Copying to tmp table on disk”、“Sorting result”、“Using filesort”等都可能是有性能问题的查询（SQL）
+
+
+事务处理  将步骤打包成一件事情来做， 失败一步 数据将回滚之前状态

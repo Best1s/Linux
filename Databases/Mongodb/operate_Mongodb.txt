@@ -1,0 +1,96 @@
+'''
+#概念
+SQL             MongoDB          说明
+databases       databases        数据库
+table           collection       数据库表/集合
+row             document         数据行/文档
+column          field            数据字段列/域
+index           index            索引
+primary key     primary key      主键,MongoDB自动将_id字段设置为主键
+
+# show dbs  查看所有数据库
+# use  DATABASE_NAME   如果数据库不存在，则创建  否则切换到数据库
+# db.dropDatabase()  删除当前数据库
+
+#BSON 是 JSON 的另一种二进制格式
+
+(>) 大于 - $gt
+(<) 小于 - $lt
+(>=) 大于等于 - $gte
+(<= ) 小于等于 - $lte
+'''
+use python
+db.python.insert({title:'python',description:'动态语言',url:'http://www.python.org',tags:['动态','编程','脚本'],linkes:100})
+
+db.python.find()   #查询       易读方式读取  db.python.find().pretty()方法
+db.python.find({"linkes":100})
+db.python.find({"linkes":{$lt:100}})
+db.python.find({"linkes":{$lte:100}})
+db.python.find({"linkes":{$gt:100}})
+db.python.find({"linkes":{$gte:100}})
+db.python.find({"linkes":{$ne:100}})
+
+'''
+# and
+db.COLLECTION_NAME.find({key1:value1,key2:value2}).pretty()
+
+# or
+db.COLLECTION_NAME.find(
+  {
+    $or:[
+      {key1:value1},{key2:value}
+    ]
+  }
+).pretty()
+
+
+'''
+db.python.find({$or:[{"likes":{$gte:100},{"title":"python"}]}).pretty()
+
+'''
+db.COLLECTION.update(
+  query,
+  update,
+  {
+    upsert:boolean
+    multi:boolean
+    writeConcern:document
+  }
+)
+query: update的查询条件，类似where
+update: 类似set后面的内容
+upsert: 可选 如果不存在update的记录则插入 默认false
+multi: 可选 默认false 只更新找到的第一条记录
+writeConcern: 可选抛出异常级别。
+
+
+'''
+db.python.update({'title':'python'},{$set:{'title':'python爬虫'}})
+'''
+#save()方法通过传入的文档替换已有文档
+db.COLLECTION.save(
+  document,
+  {
+    writeConcern:document
+  }
+)
+'''
+db.python.save({title:'Mongodb',description:'数据库',url:'http://www.python.org',tags:['分布式','mongo'],linkes:100})
+
+'''
+#删除文档，MongoDB提供remove()方法来删除文档
+db.COLLECTION.remove(
+  query,
+  {
+    justOne: boolean,
+    writeConcern: document   #大小写分明？？
+  }
+)
+query: 可选，删除的文档条件
+justOne: 可选，如果设置为true或1，则只删除一个文档
+writeConcern：可选抛出异常级别。
+
+'''
+db.python.remove({'title':'Mongodb'})
+
+db.dropDatabase()

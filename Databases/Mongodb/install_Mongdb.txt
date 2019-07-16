@@ -1,0 +1,3 @@
+Mongodb download link: https://www.mongodb.com/download-center#community
+add bin file  $PATH
+start mongodb : sudo mongod  --fork --dbpath=xxxx  --logpath=xxxx/xxxx.log  --logappend

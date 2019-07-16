@@ -1,0 +1,32 @@
+如何解决zabbix proxy 无法访问zabbix server时产生的大量zabbix agent不可达告警
+zabbix proxy通过公网访问zabbix server，有时会出现公网不稳定的情况，导致zabbix proxy无法访问zabbix server。
+
+这时会产生大量zabbix agent不可达告警。如何解决这个问题？
+
+ 
+
+我们可以在zabbix proxy上添加一个监控项及触发器zp2zs，探测zabbix server的网络连通性。
+
+zabbix proxy下的所有的zabbix agent不可达触发器都依赖这个zp2zs触发器即可。
+
+这设计到跨主机告警依赖。目前似乎只能在每个zabbix agent上分别添加告警依赖。无法在模板中使用跨主机告警依赖。
+
+ 
+
+zp2zs这个触发器应该遵循“快速失败，延迟恢复”的原则。如连续2分钟都失败则告警，连续10分钟正常才恢复。
+
+触发器表达式如下：
+
+({TRIGGER.VALUE}=0 and {Template xxxx:net.tcp.port[xxxx,xxxx].count(#2,0,eq)}=2) or ({TRIGGER.VALUE}=1 and {Template xxxx:net.tcp.port[xxxx,xxxx].count(#10,0,eq)}>0)
+
+ 
+
+但是还有一种情况可能导致整个告警风暴。proxy 和 agent之间出现问题。
+
+针对整个问题，我们可以在其中一台主机上添加一个触发器。整个触发器涉及到几台主机，只要其中一台agent.ping没有数据即告警，时间应该抢在常规的5分钟没数据即告警之前，比如设置为4分钟。
+
+然后所有主机的主机不可达触发器再依赖这个触发器，就可以达到收敛告警的效果。
+
+这个触发器表达式如下：
+
+({TRIGGER.VALUE}=0 and ({xxxx:agent.ping.nodata(4m)}=1 or {xxxx:agent.ping.nodata(4m)}=1)) or ({TRIGGER.VALUE}=1 and ({xxxx:agent.ping.count(15m,1)}<15 or {xxxx:agent.ping.count(15m,1)}<15))
