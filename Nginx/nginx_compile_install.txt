@@ -1,0 +1,385 @@
+下载Nginx安装包
+
+yum install -y gcc
+
+#PPCRE该库支持正则表达式
+yum install -y pcre pcre-devel
+
+#lib库用于对HTTP包的内容做gzip格式的压缩，如果我们在nginx.conf里配置了gzip on
+yum install -y zlib zlib-devel
+
+#服务器不只是要支持HTTP，还需要在更安全的SSL协议上传输HTTP，那么就需要拥有OpenSSL
+yum install -y openssl openssl-devel
+
+编译安装nginx
+./configure --help
+
+
+ --help                             print this message
+
+  --prefix=PATH                      set installation prefix
+  --sbin-path=PATH                   set nginx binary pathname
+  --conf-path=PATH                   set nginx.conf pathname
+  --error-log-path=PATH              set error log pathname
+  --pid-path=PATH                    set nginx.pid pathname
+  --lock-path=PATH                   set nginx.lock pathname
+
+  --user=USER                        set non-privileged user for			#指定Nginx worker进程运行时所属的用户
+                                     worker processes
+  --group=GROUP                      set non-privileged group for			#指定Nginx worker进程运行时所属的组
+                                     worker processes
+
+  --builddir=DIR                     set build directory
+
+#事件模块
+  --with-rtsig_module                enable rtsig module	#使用rtsing module 处理事件驱动 默认不安装
+  --with-select_module               enable select module	#使用select module 处理事件驱动 默认不安装 如果没找到更好的事件模块，改模块会安装
+  --without-select_module            disable select module	#不安装select_module 
+  --with-poll_module                 enable poll module		#使用poll_module 处理事件驱动 默认不安装  poll与select module类似，在大量并发时性能远不如epoll
+  --without-poll_module              disable poll module	#不安装
+
+
+
+#可选的HTTP模块，默认不会安装
+  --with-http_ssl_module             enable ngx_http_ssl_module				#提供Nginx 支持SSL协议
+  --with-http_spdy_module            enable ngx_http_spdy_module			#
+  --with-http_realip_module          enable ngx_http_realip_module			#可以从header信息里获取客户端IP地址
+  --with-http_addition_module        enable ngx_http_addition_module		#可在在返回的HTTP包头或包尾添加内容
+  --with-http_xslt_module            enable ngx_http_xslt_module			#可使XML格式的数据在发送前加入XSL渲染  需要提前安装libxml2和libxslt库
+  --with-http_image_filter_module    enable ngx_http_image_filter_module	#将符合配置的图片压缩指定大小再发送，支持JPEG,PNG,GIF格式  需安装libgd库
+  --with-http_geoip_module           enable ngx_http_geoip_module			#该模块可根据MaxMind GeoIP的ip地址数据库对客户端的IP地址得到实际的地理位置
+  --with-http_sub_module             enable ngx_http_sub_module				#可以在Nginx返回客户端的响应中将指定的字符串更换为自己需要的字符串
+																			#eg: 将</head> 替换为</head><script language="javascript" src="$script"></script>
+  --with-http_dav_module             enable ngx_http_dav_module				#可以让Nginx支持Webdav标准
+  --with-http_flv_module             enable ngx_http_flv_module				#在向客户端返回响应时，对FLV格式的视频文件在header头做一些处理，使得用户可以观看，拖动FLA视频
+  --with-http_mp4_module             enable ngx_http_mp4_module				#该模块可以观看，拖动MP4视频
+  --with-http_gunzip_module          enable ngx_http_gunzip_module
+  --with-http_gzip_static_module     enable ngx_http_gzip_static_module		#gzip static模块可以检查是否已有gzip压缩的文件，如果有直接返回，减少CPU减负
+  --with-http_random_index_module    enable ngx_http_random_index_module	#该模块在客户端访问某个目录时，随机返回该目录下的任意文件
+  --with-http_secure_link_module     enable ngx_http_secure_link_module		#提供验证请求是否有效的机制，eg：检验URL中的token参数是否是特定客户端，以及时间戳是否过期
+  --with-http_degradation_module     enable ngx_http_degradation_module		#针对特殊的系统调用直接返回响应码为204或444  目前不支持linux
+  --with-http_stub_status_module     enable ngx_http_stub_status_module		#可以让运行的Nginx提供性能统计，并发连接，请求等信息
+
+#默认开启HTTP的模块
+  --without-http_charset_module      disable ngx_http_charset_module
+  --without-http_gzip_module         disable ngx_http_gzip_module	  #按照配置文件的content-type 对特定大小的HTTP想要包执行gzip压缩
+  --without-http_ssi_module          disable ngx_http_ssi_module      #该模块可以在用户返回的HTTP响应包中加入特定的内容，如页面固定头和尾
+  --without-http_userid_module       disable ngx_http_userid_module	  #可通过HTTP请求头里的一些字段认证用户信息，以确定请求是否合法
+  --without-http_access_module       disable ngx_http_access_module	  #根据IP地址限制访问服务器
+  --without-http_auth_basic_module   disable ngx_http_auth_basic_module		#提供最简单的用户名/密码验证
+  --without-http_autoindex_module    disable ngx_http_autoindex_module		#提供简单的目录浏览功能
+  --without-http_geo_module          disable ngx_http_geo_module			#可以定义一些变量值与客户端IP关联 根据不同地区的客户端返回结果不同
+  --without-http_map_module          disable ngx_http_map_module			#可以建立Key/Value映射表，不同的Key得到相同的Value
+  --without-http_split_clients_module disable ngx_http_split_clients_module		#该模块根据客户端 IP 地址 header头 cookie等来区分处理
+  --without-http_referer_module      disable ngx_http_referer_module		#可根据请求中的referer拒绝请求
+  --without-http_rewrite_module      disable ngx_http_rewrite_module		#提供重定向功能，依赖PCRE库
+  --without-http_proxy_module        disable ngx_http_proxy_module			#提供基本的HTTP反向代理功能
+  --without-http_fastcgi_module      disable ngx_http_fastcgi_module		#提供FastCGI功能   CGI(通用网关接口)
+  --without-http_uwsgi_module        disable ngx_http_uwsgi_module			#提供uWSGI功能		与uWSGI服务器进行交换。WSGI是一种Web服务器网关接口https://baike.baidu.com/item/uwsgi
+  --without-http_scgi_module         disable ngx_http_scgi_module			#提供SCGI功能,SCGI协议是一个CGI（通用网关接口）协议的替代品
+  --without-http_memcached_module    disable ngx_http_memcached_module		#该模块可以直接由上游的memcached服务读取数据
+  --without-http_limit_conn_module   disable ngx_http_limit_conn_module		#针对IP地址限制并发连接数
+  --without-http_limit_req_module    disable ngx_http_limit_req_module		#针对IP地址限制并发请求数
+  --without-http_empty_gif_module    disable ngx_http_empty_gif_module		#收到无效的请求时，立刻返回内存中1X1像素的GIF图片
+  --without-http_browser_module      disable ngx_http_browser_module		#根据HTTP请求的user_agent 字段识别浏览器
+  --without-http_upstream_ip_hash_module									#提供Nginx 根据IP hash实现负载均衡
+                                     disable ngx_http_upstream_ip_hash_module
+  --without-http_upstream_least_conn_module									#
+                                     disable ngx_http_upstream_least_conn_module
+  --without-http_upstream_keepalive_module
+                                     disable ngx_http_upstream_keepalive_module
+
+  --with-http_perl_module            enable ngx_http_perl_module
+  --with-perl_modules_path=PATH      set Perl modules path       #第三方perl module 放置路径
+  --with-perl=PATH                   set perl binary pathname	 #perl binary 放置路径，如果Nginx会执行perl脚本必须设置此路径
+
+
+  --http-log-path=PATH               set http access log pathname
+  --http-client-body-temp-path=PATH  set path to store
+                                     http client request body temporary files
+  --http-proxy-temp-path=PATH        set path to store
+                                     http proxy temporary files
+  --http-fastcgi-temp-path=PATH      set path to store
+                                     http fastcgi temporary files
+  --http-uwsgi-temp-path=PATH        set path to store
+                                     http uwsgi temporary files
+  --http-scgi-temp-path=PATH         set path to store
+                                     http scgi temporary files
+
+
+
+  
+#可选的邮件模块  
+  --with-mail                        enable POP3/IMAP4/SMTP proxy module		#Nginx可反向代理IMAP,POP3，SMTP等协议。 默认不安装
+  --with-mail_ssl_module             enable ngx_mail_ssl_module					#该模块可以使用IMAP,POP3，SMTP等协议基于SSL/TLS协议之上使用。默认不安装 依赖OpenSSL库
+  --without-mail_pop3_module         disable ngx_mail_pop3_module				#在使用--with-mail后 默认安装 使Nginx支持POP3
+  --without-mail_imap_module         disable ngx_mail_imap_module				#在使用--with-mail后 默认安装 使Nginx支持IMAP
+  --without-mail_smtp_module         disable ngx_mail_smtp_module				#在使用--with-mail后 默认安装 使Nginx支持SMTP
+
+  --with-google_perftools_module     enable ngx_google_perftools_module
+  --with-cpp_test_module             enable ngx_cpp_test_module
+
+
+
+  --with-cc=PATH                     set C compiler pathname
+  --with-cpp=PATH                    set C preprocessor pathname
+  --with-cc-opt=OPTIONS              set additional C compiler options
+  --with-ld-opt=OPTIONS              set additional linker options
+  --with-cpu-opt=CPU                 build for the specified CPU, valid values:
+                                     pentium, pentiumpro, pentium3, pentium4,
+                                     athlon, opteron, sparc32, sparc64, ppc64
+
+
+  --without-pcre                     disable PCRE library usage        		#关闭正则库
+  --with-pcre                        force PCRE library usage		   		#强制使用PCRE库
+  --with-pcre=DIR                    set path to PCRE library sources		#指定源码位置，nginx会进入目录编译PCRE库
+  --with-pcre-opt=OPTIONS            set additional build options for PCRE	#编译PCRE时的选项
+  --with-pcre-jit                    build PCRE with JIT compilation support
+
+
+  --with-md5=DIR                     set path to md5 library sources		#指定MD5库的源码位置
+  --with-md5-opt=OPTIONS             set additional build options for md5	#编译MD5时加入的选项
+  --with-md5-asm                     use md5 assembler sources				#使用MD5汇编源码
+
+  --with-sha1=DIR                    set path to sha1 library sources
+  --with-sha1-opt=OPTIONS            set additional build options for sha1
+  --with-sha1-asm                    use sha1 assembler sources				#使用SHA1汇编源码
+
+  --with-zlib=DIR                    set path to zlib library sources
+  --with-zlib-opt=OPTIONS            set additional build options for zlib
+  --with-zlib-asm=CPU                use zlib assembler sources optimized		#针对CPU使用zlib库的汇编优化功能 目前仅支持pentium, pentiumpro架构
+                                     for the specified CPU, valid values:
+                                     pentium, pentiumpro
+
+  --with-libatomic                   force libatomic_ops library usage
+  --with-libatomic=DIR               set path to libatomic_ops library sources
+
+  --with-openssl=DIR                 set path to OpenSSL library sources			#指定源码位置，nginx会进入目录编译OpenSSL库
+  --with-openssl-opt=OPTIONS         set additional build options for OpenSSL		#编译OpenSSL时的选项
+
+#其他参数
+  --with-debug                       enable debug logging			#将Nginx需要打印的debug调试级别日志的代码编译进Nginx.
+																	#可以在Nginx运行时通过修改配置文件来使其打印调试日志。
+
+  --add-module=PATH                  enable an external module		#加入第三方模块时的路径
+  
+  --without-http                     disable HTTP server			#禁用HTTP服务器
+  --without-http-cache               disable HTTP cache				#禁用HTTP服务器里的缓存Cache特性
+  
+  --with-file-aio                    enable file AIO support		#启用文件的异步I/O功能来处理磁盘文件，需要Linux内核支持原生的异步I/O
+  --with-ipv6                        enable IPv6 support			#使Nginx支持ipv6
+
+
+
+
+
+
+
+
+
+configure脚本内容如下：
+
+
+#!/bin/sh
+# Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
+
+#auto/options	脚本处理configure命令的参数。例如，如果参数是--help，那么显示支持的所有参数格式。
+
+LC_ALL=C
+export LC_ALL   #去除所有本地化的设置，让命令能正确执行。
+
+. auto/options		#options脚本会定义后续工作将要用到的变量，然后根据本次参数以及默认值设置这些变量
+. auto/init			#auto/init脚本初始化后续将产生的文件路径。例如，Makefile、ngx_modules.c等文件默认情况下将会在<nginx-source>/objs/
+. auto/sources		#auto/sources脚本将分析Nginx的源码结构，这样才能构造后续的Makefile文件
+
+#编译过程中所有目标文件生成的路径由—builddir=DIR参数指定，默认情况下为<nginx-source>/objs，此时这个目录将会被创建
+test -d $NGX_OBJS || mkdir $NGX_OBJS
+
+
+#开始准备建立ngx_auto_headers.h、autoconf.err等必要的编译文件
+echo > $NGX_AUTO_HEADERS_H
+echo > $NGX_AUTOCONF_ERR
+
+#向objs/ngx_auto_config.h写入命令行带的参数
+echo "#define NGX_CONFIGURE \"$NGX_CONFIGURE\"" > $NGX_AUTO_CONFIG_H
+
+
+#判断DEBUG标志，如果有，那么在objs/ngx_auto_config.h文件中写入DEBUG宏
+if [ $NGX_DEBUG = YES ]; then
+	have=NGX_DEBUG . auto/have
+fi
+
+
+#现在开始检查操作系统参数是否支持后续编译
+if test -z "$NGX_PLATFORM"; then
+	echo "checking for OS"
+	NGX_SYSTEM=`uname -s 2>/dev/null`
+	NGX_RELEASE=`uname -r 2>/dev/null`
+	NGX_MACHINE=`uname -m 2>/dev/null`
+
+
+	#屏幕上输出OS名称、内核版本、32位/64位内核
+	echo " + $NGX_SYSTEM $NGX_RELEASE $NGX_MACHINE"
+	NGX_PLATFORM="$NGX_SYSTEM:$NGX_RELEASE:$NGX_MACHINE";
+	case "$NGX_SYSTEM" in
+	MINGW32_*)
+	NGX_PLATFORM=win32
+	;;
+	esac
+else
+	echo "building for $NGX_PLATFORM"
+	NGX_SYSTEM=$NGX_PLATFORM
+fi
+
+
+#检查并设置编译器，如GCC是否安装、GCC版本是否支持后续编译nginx
+. auto/cc/conf
+
+
+#对非Windows操作系统定义一些必要的头文件，并检查其是否存在，以此决定configure后续步骤是否可以成功[1]
+if [ "$NGX_PLATFORM" != win32 ]; then
+	. auto/headers
+fi
+
+
+#对于当前操作系统，定义一些特定的操作系统相关的方法并检查当前环境是否支持。例如，对于Linux，在这里使用
+#sched_setaffinity设置进程优先级，使用Linux特有的sendfile系统调用来加速向网络中发送文件块
+. auto/os/conf
+
+
+#定义类UNIX 操作系统中通用的头文件和系统调用等，并检查当前环境是否支持
+if [ "$NGX_PLATFORM" != win32 ]; then
+	. auto/unix
+fi
+
+
+#最核心的构造运行期modules的脚本。它将会生成ngx_modules.c文件，这个文件会被编译进Nginx中，其中它所做的唯一的事情就是定义了
+#ngx_modules数组。ngx_modules指明Nginx运行期间有哪些模块会参与到请求的处理中，包括
+#HTTP请求可能会使用哪些模块处理，因此，它对数组元素的顺序非常敏感，也就是说，绝大部分模块在
+#ngx_modules数组中的顺序其实是固定的。例如，一个请求必须先执行ngx_http_gzip_filter_module模块重新修改
+#HTTP响应中的头部后，才能使用ngx_http_header_filter模块按照headers_in结构体里的成员构造出以
+#TCP流形式发送给客户端的HTTP响应头部。注意，在--add-module=参数里加入的第三方模块也在此步骤写入到ngx_modules.c文件中了
+. auto/modules
+
+
+#conf脚本用来检查Nginx在链接期间需要链接的第三方静态库、动态库或者目标文件是否存在
+. auto/lib/conf
+
+
+#处理Nginx安装后的路径
+case ".$NGX_PREFIX" in
+	.)
+	NGX_PREFIX=${NGX_PREFIX:-/usr/local/nginx}
+	have=NGX_PREFIX value="\"$NGX_PREFIX/\"" . auto/define
+	;;
+	.!)
+	NGX_PREFIX=
+	;;
+	*)
+	have=NGX_PREFIX value="\"$NGX_PREFIX/\"" . auto/define
+	;;
+esac
+
+
+#处理Nginx安装后conf文件的路径
+if [ ".$NGX_CONF_PREFIX" != "." ]; then
+	have=NGX_CONF_PREFIX value="\"$NGX_CONF_PREFIX/\"" . auto/define
+fi
+
+
+#处理Nginx安装后，二进制文件、pid、lock等其他文件的路径可参见configure参数中路径类选项的说明
+have=NGX_SBIN_PATH value="\"$NGX_SBIN_PATH\"" . auto/define
+have=NGX_CONF_PATH value="\"$NGX_CONF_PATH\"" . auto/define
+have=NGX_PID_PATH value="\"$NGX_PID_PATH\"" . auto/define
+have=NGX_LOCK_PATH value="\"$NGX_LOCK_PATH\"" . auto/define
+have=NGX_ERROR_LOG_PATH value="\"$NGX_ERROR_LOG_PATH\"" . auto/define
+have=NGX_HTTP_LOG_PATH value="\"$NGX_HTTP_LOG_PATH\"" . auto/define
+have=NGX_HTTP_CLIENT_TEMP_PATH value="\"$NGX_HTTP_CLIENT_TEMP_PATH\"" . auto/define
+have=NGX_HTTP_PROXY_TEMP_PATH value="\"$NGX_HTTP_PROXY_TEMP_PATH\"" . auto/define
+have=NGX_HTTP_FASTCGI_TEMP_PATH value="\"$NGX_HTTP_FASTCGI_TEMP_PATH\"" . auto/define
+have=NGX_HTTP_UWSGI_TEMP_PATH value="\"$NGX_HTTP_UWSGI_TEMP_PATH\"" . auto/define
+have=NGX_HTTP_SCGI_TEMP_PATH value="\"$NGX_HTTP_SCGI_TEMP_PATH\"" . auto/define
+
+
+#创建编译时使用的objs/Makefile文件
+. auto/make
+
+
+#为objs/Makefile加入需要连接的第三方静态库、动态库或者目标文件
+. auto/lib/make
+
+
+#为objs/Makefile加入install功能，当执行make install时将编译生成的必要文件复制到安装路径，建立必要的目录
+. auto/install
+
+
+# 在ngx_auto_config.h文件中加入NGX_SUPPRESS_WARN宏、NGX_SMP宏
+. auto/stubs
+
+
+#在ngx_auto_config.h文件中指定NGX_USER和NGX_GROUP宏，如果执行configure时没有参数指定，默认两者皆为nobody（也就是默认以nobody用户运行进程）
+have=NGX_USER value="\"$NGX_USER\"" . auto/define
+have=NGX_GROUP value="\"$NGX_GROUP\"" . auto/define
+
+
+#显示configure执行的结果，如果失败，则给出原因
+. auto/summary
+
+
+#configure执行成功时会生成objs目录，并在目录下生成一下目录和文件；
+|---ngx_auto_headers.h
+|---autoconf.err
+|---ngx_auto_config.h
+|---ngx_modules.c
+|---src
+| |---core
+| |---event
+| | |---modules
+| |---os
+| | |---unix
+| | |---win32
+| |---http
+| | |---modules
+| | | |---perl
+| |---mail
+| |---misc
+|---Makefile
+
+#启动，停止，重新加载
+1：直接执行
+2：-c参数执行
+3：-p执行指定Nginx的安装目录
+4：指定全局配置的启动方式  -g
+5: -t参数测试配置
+6：-V显示编译阶段的参数
+
+nginx -s stop
+nginx -s quit  优雅的停止 
+kill -s SIGQUIT <nginx master pid>
+
+nginx -s reload
+kill -s SIGHUP <nginx master pid>
+
+#日志回滚       使用-s reopen参数可以重新打开日志文件不至于日志过大
+nginx -s reopen
+kill -s SIGUSR1 <nginx master pid>
+
+#平滑升级nginx  当Nginx服务升级到新的版本时，必须要将旧的二进制文件Nginx替换掉，通常情是需要重启服务的，但Nginx支持不重启服务来完成新版本的平滑升级。
+1:通过向master进程发送USR2信号可达到目的
+kill -s SIGUSR2 <nginx master pid>
+
+2:启动新版本的Nginx，
+3:通过kill命令向旧版本的master进程发送SIGQUIT信号
+
+
+
+
+ 
+
+
+
+
+
+
+

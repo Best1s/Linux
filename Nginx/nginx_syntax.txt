@@ -1,0 +1,752 @@
+#nginx调试和定位问题
+1）是否以守护进程方式运行Nginx
+daemon on|off
+默认 daemon on;
+
+2)是否以master/worker方式工作
+master_process on|off	默认开启
+
+3）error日志的设置
+语法： error_log pathfile level;
+默认： error_log logs/error.log error;
+
+pathfile也可以是/dev/null，这也是关闭error日志的唯一手段
+level是日志的输出级别，取值范围是debug、info、notice、warn、error、crit、alert、emerg，从左至右级别依次增大。小于该级别的日志则不会输出
+如果设定的日志级别是debug，则会输出所有的日志，这样数据量会很大，需要保证有足够的磁盘空间
+注意 　如果日志级别设定到debug，必须在configure时加入--with-debug配置项。
+
+4）是否处理几个特殊的调试点
+语法： debug_points[stop|abort]
+帮助用户跟踪调试Nginx的。它接受两个参数：stop和abort。
+如果设置了debug_points为stop，那么Nginx的代码执行到这些调试点时就会发出SIGSTOP信号以用于调
+试。如果debug_points设置为abort，则会产生一个coredump文件，可以使用gdb来查看Nginx当时的各种信息。
+
+5）仅对指定的客户端输出debug级别的日志
+语法： debug_connection[IP|CIDR]
+必须放在events{...}中才有效。它的值可以是IP地址或CIDR地址
+例如：
+events {
+debug_connection 10.224.66.14;
+debug_connection 10.224.57.0/24;
+}
+这样，仅仅来自以上IP地址的请求才会输出debug级别的日志，其他请求仍然沿用error_log中配置的日志级别。
+注意 　使用debug_connection前，需确保在执行configure时已经加入了--with-debug参数，否则不会生效。
+
+6）限制coredump核心转储文件的大小
+语法： worker_rlimit_core size;
+当进程发生错误或收到信号而终止时，系统会将进程执行时的内存内容（核心映像）写入一个文件（core文件），以作为调试之用
+通过worker_rlimit_core配置可以限制core文件的大小，从而有效帮助用户定位问题。
+
+7）指定coredump文件生成目录
+语法： working_directory path;
+worker进程的工作目录。这个配置项的唯一用途就是设置coredump文件所放置的目录，
+协助定位问题。因此，需确保worker进程有权限向working_directory指定的目录中写入文件。
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+#正常运行配置项
+
+1）定义环境变量
+语法： env VAR|VAR=VALUE
+这个配置项可以让用户直接设置操作系统上的环境变量。例如：env TESTPATH=/tmp/;
+
+2）嵌入其他配置文件
+语法： include pathfile;
+include配置项可以将其他配置文件嵌入到当前的nginx.conf文件中
+
+3）pid文件的路径
+语法： pid path/file;
+默认： pid logs/nginx.pid;
+保存master进程ID的pid文件存放路径。默认与configure执行时的参数“--pid-path”所指定的路径是相同的，也可以随时修改
+
+4）Nginx worker进程运行的用户及用户组
+语法： user username[groupname];
+默认： user nobody nobody;
+user用于设置master进程启动后，fork出的worker进程运行在哪个用户和用户组下。当按照“user username;”设置时，用户组名与用户名相同。
+
+5）指定Nginx worker进程可以打开的最大句柄描述符个数
+语法： worker_rlimit_nofile limit;
+设置一个worker进程可以打开的最大文件句柄数。
+
+6）限制信号队列
+语法： worker_rlimit_sigpending limit;
+设置每个用户发往Nginx的信号队列的大小。也就是说，当某个用户的信号队列满了，这个用户再发送的信号量会被丢掉。
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#优化性能的配置项
+1）Nginx worker进程个数
+语法： worker_processes number;
+默认： worker_processes 1;
+worker进程的数量会直接影响性能。一般情况下，用户要配置与CPU内核数相等的worker进程，
+并且使用下面的worker_cpu_affinity配置来绑定CPU内核。
+
+2）绑定Nginx worker进程到指定的CPU内核
+语法： worker_cpu_affinity cpumask[cpumask...]
+如果有4颗CPU内核，就可以进行如下配置：
+worker_processes 4;
+worker_cpu_affinity 1000 0100 0010 0001;
+
+3）SSL硬件加速
+语法： ssl_engine device；
+如果服务器上有SSL硬件加速设备，那么就可以进行配置以加快SSL协议的处理速度。
+用户可以使用OpenSSL提供的命令来查看是否有SSL硬件加速设备：
+openssl engine -t
+
+4）系统调用gettimeofday的执行频率
+语法： timer_resolution t;
+默认情况下，每次内核的事件调用（如epoll、select、poll、kqueue等）返回时，都会执
+行一次gettimeofday，实现用内核的时钟来更新Nginx中的缓存时钟。
+当需要降低gettimeofday的调用频率时，可以使用timer_resolution配置。
+例如，“timer_resolution 100ms；”表示至少每100ms才调用一次gettimeofday。一般不必使用这个配置。
+
+5）Nginx worker进程优先级设置
+语法： worker_priority nice;
+默认： worker_priority 0;
+该配置项用于设置Nginx worker进程的nice优先级。不建议比内核进程的nice值（通常为–5）还要小。
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#事件类配置项
+
+1）是否打开accept锁
+语法： accept_mutex[on|off]
+默认： accept_mutext on;
+accept_mutex是Nginx的负载均衡锁，可以让多个worker进程轮流地、
+序列化地与新的客户端建立TCP连接。当某一个worker进程建立的连接数量达到
+worker_connections配置的最大连接数的7/8时，会大大地减小该worker进程试图建立新TCP连
+接的机会，以此实现所有worker进程之上处理的客户端请求数尽量接近。accept锁默认是打开的
+
+2）lock文件的路径
+语法： lock_file path/file;
+默认： lock_file logs/nginx.lock;
+accept锁可能需要这个lock文件，如果accept锁关闭，lock_file配置完全不生效
+
+3）使用accept锁后到真正建立连接之间的延迟时间
+语法： accept_mutex_delay Nms;
+默认： accept_mutex_delay 500ms;
+在使用accept锁后，同一时间只有一个worker进程能够取到accept锁。这个accept锁不是阻塞锁，如果取不到会立刻返回。
+如果有一个worker进程试图取accept锁而没有取到，它至少要等accept_mutex_delay定义的时间间隔后才能再次试图取锁。
+
+4）批量建立新连接
+语法： multi_accept[on|off];
+默认： multi_accept off;
+当事件模型通知有新连接时，尽可能地对本次调度中客户端发起的所有TCP请求都建立连接。
+
+5）选择事件模型
+语法： use[kqueue|rtsig|epoll|/dev/poll|select|poll|eventport];
+默认： Nginx会自动使用最适合的事件模型。
+对于Linux操作系统来说，可供选择的事件驱动模型有poll、select、epoll三种。epoll是性能最高的一种
+
+6）每个worker的最大连接数
+语法： worker_connections number;
+定义每个worker进程可以同时处理的最大连接数。
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#HTTP核心配置
+所有的HTTP配置项都必须直属于http块、server块、location块、upstream块或if块等
+以下8类进行详述：虚拟主机与请求的分发、文件路径的定义、内存及磁盘资源的分配、网
+络连接的设置、MIME类型的设置、对客户端请求的限制、文件操作的优化、对客户端请求的特殊处理。
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#虚拟主机与请求的分发
+1）监听端口
+语法： listen address:port[default(deprecated in 0.8.21)|default_server|[backlog=num|
+rcvbuf=size|sndbuf=size|accept_filter=filter|deferred|bind|ipv6only=[on|off]|ssl]]; 
+默认： listen 80;
+
+配置块： server
+listen参数决定Nginx服务如何监听端口。在listen后可以只加IP地址、端口或主机名，非常灵活，
+
+例如：listen 127.0.0.1:8000;
+listen 127.0.0.1; #注意：不加端口时，默认监听80端口
+
+listen 8000;
+listen *:8000;
+listen localhost:8000;
+
+如果服务器使用IPv6地址，那么可以这样使用：
+listen [::]:8000;
+listen [fe80::1];
+listen [:::a8c9:1234]:80;
+
+在地址和端口后，还可以加上其他参数，例如：
+listen 443 default_server ssl;
+listen 127.0.0.1 default_server accept_filter=dataready backlog=1024;
+
+·default：将所在的server块作为整个Web服务的默认server块。如果没有设置这个参数，那么将会以在nginx.conf中找到的第一个server块作为默认server块。
+
+·default_server：同上。
+·backlog=num：表示TCP中backlog队列的大小。默认为–1，表示不予设置。
+
+·rcvbuf=size：设置监听句柄的SO_RCVBUF参数。
+·sndbuf=size：设置监听句柄的SO_SNDBUF参数。
+·accept_filter：设置accept过滤器，只对FreeBSD操作系统有用。
+·deferred：在设置该参数后，若用户发起建立连接请求，并且完成了TCP的三次握手，
+内核也不会为了这次的连接调度worker进程来处理，只有用户真的发送请求数据时（内核已
+经在网卡中收到请求数据包），内核才会唤醒worker进程处理这个连接。这个参数适用于大
+并发的情况下，它减轻了worker进程的负担。符合自己的业务需求时，才可以使用deferred配置。
+·bind：绑定当前端口/地址对，如127.0.0.1:8000。只有同时对一个端口监听多个地址时才会生效。
+·ssl：在当前监听的端口上建立的连接必须基于SSL协议。
+
+2）主机名称
+语法： server_name name[...];
+默认： server_name"";
+配置块： server
+server_name后可以跟多个主机名称
+在开始处理一个HTTP请求时，Nginx会取出header头中的Host，与每个server中的server_name进行匹配，以此决定到底由哪一个server块来处理这个请求。
+当Host与多个server块中的server_name都匹配，这时就会根据匹配优先级来选择实际处理的server块
+1）首先选择所有字符串完全匹配的server_name，如www.testweb.com 。
+2）其次选择通配符在前面的server_name，如*.testweb.com。
+3）再次选择通配符在后面的server_name，如www.testweb.* 。
+4）最后选择使用正则表达式才匹配的server_name，如~^\.testweb\.com$。
+
+如果都不Host都不匹配会，按下列顺序选择处理的server块。
+1）优先选择在listen配置项后加入[default|default_server]的server块。
+2）找到匹配listen端口的第一个server块。
+如果server_name后跟着空字符串（如server_name"";），那么表示匹配没有Host这个HTTP头部的请求。
+
+3）server_names_hash_bucket_size
+语法： server_names_hash_bucket_size size;
+默认： server_names_hash_bucket_size 32|64|128;
+配置块： http、server、location
+为了提高快速寻找到相应server name的能力，Nginx使用散列表来存储server name。
+server_names_hash_bucket_size设置了每个散列桶占用的内存大小。
+
+server_names_hash_max_size
+语法： server_names_hash_max_size size;
+默认： server_names_hash_max_size 512;
+配置块： http、server、location
+server_names_hash_max_size会影响散列表的冲突率。server_names_hash_max_size越大，
+消耗的内存就越多，但散列key的冲突率则会降低，检索速度也更快。
+server_names_hash_max_size越小，消耗的内存就越小，但散列key的冲突率可能增高。
+
+5）重定向主机名称的处理
+语法： server_name_in_redirect on|off;
+默认： server_name_in_redirect on;
+配置块： http、server或者location
+该配置需要配合server_name使用。在使用on打开时，表示在重定向请求时会使用
+server_name里配置的第一个主机名代替原先请求中的Host头部，而使用off关闭时，表示在重定向请求时使用请求本身的Host头部。
+
+6）location
+语法： location[=|~|~*|^~|@]/uri/{...}
+配置块： server
+location会尝试根据用户请求中的URI来匹配上面的/uri表达式，如果可以匹配，就选择location{}块中的配置来处理用户请求。
+
+= 表示把URI作为字符串，以便与参数中的uri做完全匹配。例如：
+#只有当用户请求是/时，才会使用该location下的配置
+location = / {
+		…
+}
+~  表示匹配URI时是字母大小写敏感的。
+~* 表示匹配URI时忽略字母大小写问题。
+^~ 表示匹配URI时只需要其前半部分与uri参数匹配即可。例如：
+location ^~ images {
+# 以images开始的请求都会匹配上
+…
+}
+@ 表示仅用于Nginx服务内部请求之间的重定向，带有@的location不直接处理用户请求。
+
+在uri参数里是可以用正则表达式的，例如：
+location ~* \.(gif|jpg|jpeg)$ {
+# 匹配以.gif、.jpg、.jpeg结尾的请求
+…
+}
+当一个请求有可能匹配多个location时，实际上这个请求会被第一个location处理。
+
+location / {
+# /可以匹配所有请求
+…
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+文件路径的定义
+
+（1）以root方式设置资源路径
+语法： root path;
+默认： root html;
+配置块： http、server、location、if
+例如，定义资源文件相对于HTTP请求的根目录。
+location /download/ {
+root optwebhtml;
+}
+
+2）以alias方式设置资源路径
+语法： alias path;
+配置块： location
+alias也是用来设置文件资源路径的，它与root的不同点主要在于如何解读紧跟location后面的uri参数
+注意：
+1. alias在使用正则匹配时，必须捕捉要匹配的内容并在指定的内容处使用。
+2. alias只能位于location块中
+3. alias 加/
+
+3）访问首页        ngx_http_index_module模块提供的index配置实现，index后可以跟多个文件参数，Nginx将会按照顺序来访问这些文件
+语法： index file...;
+默认： index index.html;
+配置块： http、server、location
+
+
+
+4）根据HTTP返回码重定向页面
+语法： error_page code[code...][=|=answer-code]uri|@named_location
+配置块： http、server、location、if
+对于某个请求返回错误码时，如果匹配上了error_page中设置的code，则重定向到新的URI中
+
+5）是否允许递归使用error_page
+语法： recursive_error_pages[on|off];
+默认： recursive_error_pages off;
+配置块： http、server、location
+确定是否允许递归地定义error_page。
+
+6）try_files
+语法： try_files path1[path2]uri;
+配置块： server、location
+尝试按照顺序访问每一个path，如果可以有效地读取，就直接向用户返回这个path对应的文件结束请求，否则继续向下访问
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+内存及磁盘资源的分配
+
+
+1）HTTP包体只存储到磁盘文件中
+语法： client_body_in_file_only on|clean|off;
+默认： client_body_in_file_only off;
+配置块： http、server、location
+当值为非off时，用户请求中的HTTP包体一律存储到磁盘文件中，即使只有0字节也会存储为文件。
+当请求结束时，如果配置为on，则这个文件不会被删除（该配置一般用于调试、定位问题），但如果配置为clean，则会删除该文件。
+
+
+2）HTTP包体尽量写入到一个内存buffer中
+语法： client_body_in_single_buffer on|off;
+默认： client_body_in_single_buffer off;
+配置块： http、server、location
+用户请求中的HTTP包体一律存储到内存buffer中。，如果HTTP包体的大小超过了
+下面client_body_buffer_size设置的值，包体还是会写入到磁盘文件中。
+
+
+3）存储HTTP头部的内存buffer大小
+语法： client_header_buffer_size size;
+默认： client_header_buffer_size 1k;
+配置块： http、server
+定义了Nginx接收用户请求中HTTP header部分（包括HTTP行和HTTP头部）时分配的内存buffer大小。
+有时，请求中的HTTP header部分可能会超过这个大小，这时large_client_header_buffers定义的buffer将会生效。
+
+
+4）存储超大HTTP头部的内存buffer大小
+语法： large_client_header_buffers number size;
+默认： large_client_header_buffers 48k;
+配置块： http、server
+large_client_header_buffers定义了Nginx接收一个超大HTTP头部请求的buffer个数和每个buffer的大小。
+如果HTTP请求行的大小超过上面的单个buffer，则返回"Request URI too large"(414)。
+
+
+5）存储HTTP包体的内存buffer大小
+语法： client_body_buffer_size size;
+默认： client_body_buffer_size 8k/16k;
+配置块： http、server、location
+定义了Nginx接收HTTP包体的内存缓冲区大小
+HTTP包体会先接收到指定的这块缓存中，之后才决定是否写入磁盘。
+注意 　
+如果用户请求中含有HTTP头部Content-Length，并且其标识的长度小于定义
+的buffer大小，那么Nginx会自动降低本次请求所使用的内存buffer，以降低内存消耗。
+
+
+6）HTTP包体的临时存放目录
+语法： client_body_temp_path dir-path[level1[level2[level3]]]
+默认： client_body_temp_path client_body_temp;
+配置块： http、server、location
+定义HTTP包体存放的临时目录。
+在接收HTTP包体时，如果包体的大小大于client_body_buffer_size，则会以一个递增的整数命名并存放到client_body_temp_path指定的目录中。
+后面跟着的level1、level2、level3，是为了防止一个目录下的文件数量太多
+例如：
+client_body_temp_path optnginx/client_temp 1 2;
+
+
+7）connection_pool_size
+语法： connection_pool_size size;
+默认： connection_pool_size 256;
+配置块： http、server
+Nginx对于每个建立成功的TCP连接会预先分配一个内存池，上面的size配置项将指定这个内存池的初始大小
+用于减少内核对于小块内存的分配次数。需慎重设置，因为更大
+的size会使服务器消耗的内存增多，而更小的size则会引发更多的内存分配次数。
+
+
+8）request_pool_size
+语法： request_pool_size size;
+默认： request_pool_size 4k;
+配置块： http、server
+Nginx开始处理HTTP请求时，将会为每个请求都分配一个内存池，size配置项将指定这个内存池的初始大小
+用于减少内核对于小块内存的分配次数。TCP连接关闭时会销毁
+connection_pool_size指定的连接内存池，HTTP请求结束时会销毁request_pool_size指定的
+HTTP请求内存池，但它们的创建、销毁时间并不一致，因为一个TCP连接可能被复用于多个HTTP请求。
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+网络连接的设置
+1）读取HTTP头部的超时时间
+语法： client_header_timeout time（默认单位：秒）;
+默认： client_header_timeout 60;
+配置块： http、server、location
+客户端与服务器建立连接后将开始接收HTTP头部，在这个过程中，如果在一个时间间
+隔（超时时间）内没有读取到客户端发来的字节，则认为超时，并向客户端返回408("Request timed out")响应。
+
+
+2）读取HTTP包体的超时时间
+语法： client_body_timeout time（默认单位：秒）；
+默认： client_body_timeout 60;
+配置块： http、server、location
+此配置项与client_header_timeout相似，只是这个超时时间只在读取HTTP包体时才有效。
+
+
+3）发送响应的超时时间
+语法： send_timeout time;
+默认： send_timeout 60;
+配置块： http、server、location
+这个超时时间是发送响应的超时时间，即Nginx服务器向客户端发送了数据包，但客户
+端一直没有去接收这个数据包。如果某个连接超过send_timeout定义的超时时间，那么Nginx将会关闭这个连接。
+
+
+）reset_timeout_connection
+语法： reset_timeout_connection on|off;
+默认： reset_timeout_connection off;
+配置块： http、server、location
+连接超时后将通过向客户端发送RST包来直接重置连接。
+打开后，Nginx会在某个连接超时后，不是使用正常情形下的四次握手关闭TCP连接，而是直接向用户发送RST重
+置包，不再等待用户的应答，直接释放Nginx服务器上关于这个套接字使用的所有缓存
+（如TCP滑动窗口）。相比正常的关闭方式，它使得服务器避免产生许多处于FIN_WAIT_1、FIN_WAIT_2、TIME_WAIT状态的TCP连接。
+注意，使用RST重置包关闭连接会带来一些问题，默认情况下不会开启。
+
+
+5）lingering_close
+语法： lingering_close off|on|always;
+默认： lingering_close on;
+配置块： http、server、location
+该配置控制Nginx关闭用户连接的方式。always表示关闭用户连接前必须无条件地处理连
+接上所有用户发送的数据。off表示关闭连接时完全不管连接上是否已经有准备就绪的来自用
+户的数据。on是中间值，一般情况下在关闭连接前都会处理连接上的用户发送的数据，
+除了有些情况下在业务上认定这之后的数据是不必要的。
+
+
+6）lingering_time
+语法： lingering_time time;
+默认： lingering_time 30s;
+配置块： http、server、location
+lingering_close启用后，这个配置项对于上传大文件很有用。上文讲过，当用户请求的
+Content-Length大于max_client_body_size配置时，Nginx服务会立刻向用户发送413（Request
+entity too large）响应。但是，很多客户端可能不管413返回值，仍然持续不断地上传HTTP
+body，这时，经过了lingering_time设置的时间后，Nginx将不管用户是否仍在上传，都会把连接关闭掉。
+
+
+7）lingering_timeout
+语法： lingering_timeout time;
+默认： lingering_timeout 5s;
+配置块： http、server、location
+lingering_close生效后，在关闭连接前，会检测是否有用户发送的数据到达服务器，如果超过lingering_timeout
+时间后还没有数据可读，就直接关闭连接；否则，必须在读取完连接缓冲区上的数据并丢弃掉后才会关闭连接。
+
+
+8）对某些浏览器禁用keepalive功能
+语法： keepalive_disable[msie6|safari|none]...
+默认： keepalive_disablemsie6 safari
+配置块： http、server、location
+HTTP请求中的keepalive功能是为了让多个请求复用一个HTTP长连接，这个功能对服务
+器的性能提高是很有帮助的。但有些浏览器，如IE 6和Safari，它们对于使用keepalive功能的
+POST请求处理有功能性问题。因此，针对IE 6及其早期版本、Safari浏览器默认是禁用keepalive功能的。
+
+
+9）keepalive超时时间
+语法： keepalive_timeout time（默认单位：秒）;
+默认： keepalive_timeout 75;
+配置块： http、server、location
+一个keepalive连接在闲置超过一定时间后（默认的是75秒），服务器和浏览器都会去关闭这个连接。
+keepalive_timeout配置项是用来约束Nginx服务器的，Nginx也会按照规范把这个时间传给浏览器
+但每个浏览器对待keepalive的策略有可能是不同的。
+
+
+10）一个keepalive长连接上允许承载的请求最大数
+语法： keepalive_requests n;
+默认： keepalive_requests 100;
+配置块： http、server、location
+一个keepalive连接上默认最多只能发送100个请求。
+
+
+11）tcp_nodelay
+语法： tcp_nodelay on|off;
+默认： tcp_nodelay on;
+配置块： http、server、location
+确定对keepalive连接是否使用TCP_NODELAY选项。
+
+
+（12）tcp_nopush
+语法： tcp_nopush on|off;
+默认： tcp_nopush off;
+配置块： http、server、location
+在打开sendfile选项时，确定是否开启FreeBSD系统上的TCP_NOPUSH或Linux系统上的
+TCP_CORK功能。打开tcp_nopush后，将会在发送响应时把整个响应包头放到一个TCP包中发送。
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+MIME类型的设置
+
+·MIME type与文件扩展的映射
+语法： type{...};
+配置块： http、server、location
+定义MIME type到文件扩展名的映射。多个扩展名可以映射到同一个MIME type。例如：
+types {
+text/html html;
+text/html conf;
+image/gif gif;
+image/jpeg jpg;
+}
+·默认MIME type
+语法： default_type MIME-type;
+默认： default_type text/plain;
+配置块： http、server、location
+当找不到相应的MIME type与文件扩展名之间的映射时，使用默认的MIME type作为HTTP header中的Content-Type。
+
+
+·types_hash_bucket_size
+语法： types_hash_bucket_size size;
+默认： types_hash_bucket_size 32|64|128;
+配置块： http、server、location
+为了快速寻找到相应MIME type，Nginx使用散列表来存储MIME type与文件扩展名。
+types_hash_bucket_size设置了每个散列桶占用的内存大小。
+
+
+·types_hash_max_size
+语法： types_hash_max_size size;
+默认： types_hash_max_size 1024;
+配置块： http、server、location
+types_hash_max_size影响散列表的冲突率。types_hash_max_size越大，就会消耗更多的内存，
+但散列key的冲突率会降低，检索速度就更快。types_hash_max_size越小，消耗的内存就越小，但散列key的冲突率可能上升。
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+对客户端请求的限制
+
+
+1）按HTTP方法名限制用户请求
+语法： limit_except method...{...}
+配置块： location
+Nginx通过limit_except后面指定的方法名来限制用户请求。方法名可取值包括：GET、
+HEAD、POST、PUT、DELETE、MKCOL、COPY、MOVE、OPTIONS、PROPFIND、PROPPATCH、LOCK、UNLOCK或者PATCH。例如：
+limit_except GET {
+allow 192.168.1.0/32;
+deny all;
+}
+注意，允许GET方法就意味着也允许HEAD方法。因此，上面这段代码表示的是禁止GET方法和HEAD方法，但其他HTTP方法是允许的。
+
+
+2）HTTP请求包体的最大值
+语法： client_max_body_size size;
+默认： client_max_body_size 1m;
+配置块： http、server、location
+浏览器在发送含有较大HTTP包体的请求时，其头部会有一个Content-Length字段，
+client_max_body_size是用来限制Content-Length所示值的大小的。
+这个限制包体的配置非常有用处，因为不用等Nginx接收完所有的HTTP包体——这有可能消耗很长时间——就可以告诉用户请求过大不被接受。
+
+
+3）对请求的限速
+语法： limit_rate speed;
+默认： limit_rate 0;
+配置块： http、server、location、if
+此配置是对客户端请求限制每秒传输的字节数。speed可以使用2.2.4节中提到的多种单位，默认参数为0，表示不限速。
+针对不同的客户端，可以用$limit_rate参数执行不同的限速策略。例如：
+server {
+if ($slow) {
+set $limit_rate 4k;
+}
+}
+
+4）limit_rate_after
+语法： limit_rate_after time;
+默认： limit_rate_after 1m;
+配置块： http、server、location、if
+此配置表示Nginx向客户端发送的响应长度超过limit_rate_after后才开始限速。例如：
+limit_rate_after 1m;
+limit_rate 100k;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+文件操作的优化
+
+
+1）sendfile系统调用
+语法： sendfile on|off;
+默认： sendfile off;
+配置块： http、server、location
+可以启用Linux上的sendfile系统调用来发送文件，它减少了内核态与用户态之间的两次
+内存复制，这样就会从磁盘中读取文件后直接在内核态发送到网卡设备，提高了发送文件的效率。
+
+
+2）AIO系统调用
+语法： aio on|off;
+默认： aio off;
+配置块： http、server、location
+此配置项表示是否在FreeBSD或Linux系统上启用内核级别的异步文件I/O功能。注意，它与sendfile功能是互斥的。
+
+
+3）directio
+语法： directio size|off;
+默认： directio off;
+配置块： http、server、location
+此配置项在FreeBSD和Linux系统上使用O_DIRECT选项去读取文件，缓冲区大小为size，
+通常对大文件的读取速度有优化作用。注意，它与sendfile功能是互斥的。
+
+
+4）directio_alignment
+语法： directio_alignment size;
+默认： directio_alignment 512;
+配置块： http、server、location
+它与directio配合使用，指定以directio方式读取文件时的对齐方式。一般情况下，512B
+已经足够了，但针对一些高性能文件系统，如Linux下的XFS文件系统，可能需要设置到4KB作为对齐方式。
+
+
+5）打开文件缓存
+语法： open_file_cache max=N[inactive=time]|off;
+默认： open_file_cache off;
+配置块： http、server、location
+文件缓存会在内存中存储以下3种信息：
+·文件句柄、文件大小和上次修改时间。
+·已经打开过的目录结构。
+·没有找到的或者没有权限操作的文件信息。
+这样，通过读取缓存就减少了对磁盘的操作。该配置项后面跟3种参数。
+·max：表示在内存中存储元素的最大个数。当达到最大限制数量后，将采用
+LRU（Least Recently Used）算法从缓存中淘汰最近最少使用的元素。
+·inactive：表示在inactive指定的时间段内没有被访问过的元素将会被淘汰。默认时间为60秒。
+·off：关闭缓存功能。
+例如：
+open_file_cache max=1000 inactive=20s;
+
+
+6）是否缓存打开文件错误的信息
+语法： open_file_cache_errors on|off;
+默认： open_file_cache_errors off;
+配置块： http、server、location
+此配置项表示是否在文件缓存中缓存打开文件时出现的找不到路径、没有权限等错误信息。
+
+
+7）不被淘汰的最小访问次数
+语法： open_file_cache_min_uses number;
+默认： open_file_cache_min_uses 1;
+配置块： http、server、location
+它与open_file_cache中的inactive参数配合使用。如果在inactive指定的时间段内，访问次
+数超过了open_file_cache_min_uses指定的最小次数，那么将不会被淘汰出缓存。
+
+
+8）检验缓存中元素有效性的频率
+语法： open_file_cache_valid time;
+默认： open_file_cache_valid 60s;
+配置块： http、server、location
+默认为每60秒检查一次缓存中的元素是否仍有效。
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+对客户端请求的特殊处理
+
+1）忽略不合法的HTTP头部
+语法： ignore_invalid_headers on|off;
+默认： ignore_invalid_headers on;
+配置块： http、server
+如果将其设置为off，那么当出现不合法的HTTP头部时，Nginx会拒绝服务，并直接向用
+户发送400（Bad Request）错误。如果将其设置为on，则会忽略此HTTP头部。
+
+
+2）HTTP头部是否允许下划线
+语法： underscores_in_headers on|off;
+默认： underscores_in_headers off;
+配置块： http、server
+默认为off，表示HTTP头部的名称中不允许带“_”（下划线）。
+
+
+3）对If-Modified-Since头部的处理策略
+语法： if_modified_since[off|exact|before];
+默认： if_modified_since exact;
+配置块： http、server、location
+出于性能考虑，Web浏览器一般会在客户端本地缓存一些文件，并存储当时获取的时
+间。这样，下次向Web服务器获取缓存过的资源时，就可以用If-Modified-Since头部把上次获
+取的时间捎带上，而if_modified_since将根据后面的参数决定如何处理If-Modified-Since头部。
+
+相关参数说明如下。
+
+·off：表示忽略用户请求中的If-Modified-Since头部。这时，如果获取一个文件，那么会
+正常地返回文件内容。HTTP响应码通常是200。
+
+·exact：将If-Modified-Since头部包含的时间与将要返回的文件上次修改的时间做精确比
+较，如果没有匹配上，则返回200和文件的实际内容，如果匹配上，则表示浏览器缓存的文
+件内容已经是最新的了，没有必要再返回文件从而浪费时间与带宽了，这时会返回304 Not
+Modified，浏览器收到后会直接读取自己的本地缓存。
+
+·before：是比exact更宽松的比较。只要文件的上次修改时间等于或者早于用户请求中
+的If-Modified-Since头部的时间，就会向客户端返回304 Not Modified。
+
+
+4）文件未找到时是否记录到error日志
+语法： log_not_found on|off;
+默认： log_not_found on;
+配置块： http、server、location
+此配置项表示当处理用户请求且需要访问文件时，如果没有找到文件，是否将错误日志记录到error.log文件中。这仅用于定位问题。
+
+
+（5）merge_slashes
+语法： merge_slashes on|off;
+默认： merge_slashes on;
+配置块： http、server、location
+此配置项表示是否合并相邻的“”，例如，/test///a.txt，在配置为on时，会将其匹配为
+location/test/a.txt；如果配置为off，则不会匹配，URI将仍然是//test///a.txt。
+
+
+6）DNS解析地址
+语法： resolver address...;
+配置块： http、server、location
+设置DNS名字解析服务器的地址，例如：
+resolver 127.0.0.1 192.0.2.1;
+
+
+7）DNS解析的超时时间
+语法： resolver_timeout time;
+默认： resolver_timeout 30s;
+配置块： http、server、location
+此配置项表示DNS解析的超时时间。
+
+
+8）返回错误页面时是否在Server中注明Nginx版本
+语法： server_tokens on|off;
+默认： server_tokens on;
+配置块： http、server、location
+表示处理请求出错时是否在响应的Server头部中标明Nginx版本，这是为了方便定位问题。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

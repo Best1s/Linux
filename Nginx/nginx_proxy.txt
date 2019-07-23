@@ -1,0 +1,221 @@
+负载均衡的基本配置
+
+1）upstream块
+语法： upstream name{...}
+配置块： http
+upstream块定义了一个上游服务器的集群，便于反向代理中的proxy_pass使用。例如：
+upstream backend {
+server backend1.example.com;
+server backend2.example.com;
+server backend3.example.com;
+}
+server {
+location / {
+proxy_pass http://backend;
+}
+}
+
+
+2）server
+语法： server name[parameters];
+配置块： upstream
+server配置项指定了一台上游服务器的名字，这个名字可以是域名、IP地址端口、UNIX
+句柄等，在其后还可以跟下列参数。
+
+·weight=number：设置向这台上游服务器转发的权重，默认为1。
+
+·max_fails=number：该选项与fail_timeout配合使用，指在fail_timeout时间段内，如果向
+当前的上游服务器转发失败次数超过number，则认为在当前的fail_timeout时间段内这台上游
+服务器不可用。max_fails默认为1，如果设置为0，则表示不检查失败次数。
+
+·fail_timeout=time：fail_timeout表示该时间段内转发失败多少次后就认为上游服务器暂
+时不可用，用于优化反向代理功能。它与向上游服务器建立连接的超时时间、读取上游服务
+器的响应超时时间等完全无关。fail_timeout默认为10秒。
+
+·down：表示所在的上游服务器永久下线，只在使用ip_hash配置项时才有用。
+
+·backup：在使用ip_hash配置项时它是无效的。它表示所在的上游服务器只是备份服务
+器，只有在所有的非备份上游服务器都失效后，才会向所在的上游服务器转发请求。
+列如：
+upstream backend {
+server backend1.example.com weight=5;
+server 127.0.0.1:8080 max_fails=3 fail_timeout=30s;
+server unix:/tmp/backend3;
+}
+
+
+3）ip_hash
+语法： ip_hash;
+配置块： upstream
+希望来自某一个用户的请求始终落到固定的一台上游服务器中。
+ip_hash与weight（权重）配置不可同时使用。如果upstream集群中有一台上游服务器暂
+时不可用，不能直接删除该配置，而是要down参数标识，确保转发策略的一贯性。例如：
+upstream backend {
+ip_hash;
+server backend1.example.com;
+server backend2.example.com;
+server backend3.example.com down;
+server backend4.example.com;
+}
+
+
+4）记录日志时支持的变量
+如果需要将负载均衡时的一些信息记录到access_log日志中，在定义日志格式时可以使用负载均衡功能提供的变量。
+$upstream_addr				处理请求的上游服务器地址
+$upstream_cache_status		表示是否命中缓存，取值范围：MISS,EXPIRED,UPDATING,STALE,HIT
+$upstream_status			上游服务器返回的响应中的HTTP响应码
+$upstream_response_time		上游服务器的响应时间，精确到毫秒
+$upstream_http_$HEADER		HTTP的头部，如upstream_http_host
+
+
+例如，可以在定义access_log访问日志格式时使用以上的变量。
+log_format timing '$remote_addr - $remote_user [$time_local] $request '
+'upstream_response_time $upstream_response_time '
+'msec $msec request_time $request_time';
+log_format up_head '$remote_addr - $remote_user [$time_local] $request '
+'upstream_http_content_type $upstream_http_content_type';
+
+
+反向代理的基本配置
+
+1）proxy_pass
+语法： proxy_pass URL;
+配置块： location、if
+此配置项将当前请求反向代理到URL参数指定的服务器上，URL可以是主机名或IP地址加端口的形式，例如：
+proxy_pass http://localhost:8000/uri/;
+
+也可以是UNIX句柄：
+proxy_pass http://unix:/path/to/backend.socket:/uri/;
+
+还可以如上节负载均衡中所示，直接使用upstream块，例如：
+upstream backend {
+…
+}
+server {
+location / {
+proxy_pass http://backend;
+}
+}
+
+用户可以把HTTP转换成更安全的HTTPS，例如：
+proxy_pass https://192.168.0.1;
+默认情况下反向代理是不会转发请求中的Host头部的。如果需要转发，那么必须加上配置：
+proxy_set_header Host $host;
+
+
+2）proxy_method
+语法： proxy_method method;
+配置块： http、server、location
+此配置项表示转发时的协议方法名。例如设置为：
+proxy_method POST;
+那么客户端发来的GET请求在转发时方法名也会改为POST。
+
+
+3）proxy_hide_header
+语法： proxy_hide_header the_header;
+配置块： http、server、location
+Nginx会将上游服务器的响应转发给客户端，但默认不会转发以下HTTP头部字段：
+Date、Server、X-Pad和X-Accel-*。使用proxy_hide_header后可以任意地指定哪些HTTP头部字段不能被转发。
+例如：
+proxy_hide_header Cache-Control;
+proxy_hide_header MicrosoftOfficeWebServer;
+
+
+4）proxy_pass_header
+语法： proxy_pass_header the_header;
+配置块： http、server、location
+与proxy_hide_header功能相反，proxy_pass_header会将原来禁止转发的header设置为允许转发。
+例如：
+proxy_pass_header X-Accel-Redirect;
+
+
+5）proxy_pass_request_body
+语法： proxy_pass_request_body on|off;
+默认： proxy_pass_request_body on;
+配置块： http、server、location
+作用为确定是否向上游服务器发送HTTP包体部分。
+
+
+6）proxy_pass_request_headers
+语法： proxy_pass_request_headers on|off;
+默认： proxy_pass_request_headers on;
+配置块： http、server、location
+作用为确定是否转发HTTP头部。
+
+
+7）proxy_redirect
+语法： proxy_redirect[default|off|redirect replacement];
+默认： proxy_redirect default;
+配置块： http、server、location
+当上游服务器返回的响应是重定向或刷新请求（如HTTP响应码是301或者302）时，
+proxy_redirect可以重设HTTP头部的location或refresh字段。例如，如果上游服务器发出的响
+应是302重定向请求，location字段的URI是http://localhost:8000/two/some/uri/ ，那么在下面的
+配置情况下，实际转发给客户端的location是http://frontendonesome/uri/ 。
+proxy_redirect http://localhost:8000/two/
+http://frontendone;
+
+还可以使用ngx-http-core-module提供的变量来设置新的location字段。例如：
+proxy_redirect http://localhost:8000/
+http://$host:$server_port/;
+也可以省略replacement参数中的主机名部分，这时会用虚拟主机名称来填充。例如：
+proxy_redirect http://localhost:8000/two/one;
+
+
+8）proxy_next_upstream
+语法：
+proxy_next_upstream[error|timeout|invalid_header|http_500|http_502|http_503|http_504|http_404|off];
+默认： proxy_next_upstream error timeout;
+配置块： http、server、location
+此配置项表示当向一台上游服务器转发请求出现错误时，继续换一台上游服务器处理这个请求。
+
+·error：当向上游服务器发起连接、发送请求、读取响应时出错。
+·timeout：发送请求或读取响应时发生超时。
+·invalid_header：上游服务器发送的响应是不合法的。
+·http_500：上游服务器返回的HTTP响应码是500。
+·http_502：上游服务器返回的HTTP响应码是502。
+·http_503：上游服务器返回的HTTP响应码是503。
+·http_504：上游服务器返回的HTTP响应码是504。
+·http_404：上游服务器返回的HTTP响应码是404。
+·off：关闭proxy_next_upstream功能—出错就选择另一台上游服务器再次转发。
+
+Nginx的反向代理模块还提供了很多种配置，如设置连接的超时时间、临时文件如何存
+储，以及最重要的如何缓存上游服务器响应等功能。这些配置可以通过阅读ngx_http_proxy_module模块
+只有深入地理解，才能实现一个高性能的反向代理服务器。
+
+Nginx的Wiki网站（http://wiki.nginx.org/Modules ）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
