@@ -1,6 +1,47 @@
-1，	部署jdk。http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-2，	部署tomcat。https://tomcat.apache.org/download-80.cgi
-3，	部署Jenkins。 http://jenkins-ci.org/  #download  Generic Java package(.war)  
-#把war包放入tomcat的appweb 目录 执行tomca/bin/startup.sh  可以同时监控下logs/catalina.out
+1，	部署java环境。https://www.java.com/en/download/manual.jsp
+	https://www.oracle.com/technetwork/java/javase/downloads/index.html
+/etc/profile     或者使用的用户下的.bash_profile	
+export JAVA_HOME=/usr/local/server/java/jdk1.8.0_221
+export PATH=$PATH:$JAVA_HOME/bin 
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+	
+2，	部署tomcat。https://tomcat.apache.org/download-80.cgi  或者 GlassFish
+	
+
+3，	下载Jenkins。https://jenkins.io/zh/doc/pipeline/tour/getting-started/	#download  Generic Java package(.war)
+
+启动方式
+1）
+#把war包放入tomcat的webapps 目录 执行tomcat/bin/startup.sh  可以同时监控下logs/catalina.out
+
+2）
+#不用tomcat  直接启动  java -jar jenkins.war --httpPort=8080
+
+3）docker启动
+docker 中运行
+
+docker pull jenkins/jenkins
+docker run \
+  -u root \
+  --rm \  
+  -d \ 
+  -p 8080:8080 \ 
+  -p 50000:50000 \ 
+  -v jenkins-data:/var/jenkins_home \ 
+  -v /var/run/docker.sock:/var/run/docker.sock \ 
+  jenkinsci/blueocean 
+
+
+https://jenkins.io/zh/doc/book/installing/
+
+
+
 4，	配置Jenkins。ip:8080
-5: 启动Jenkins
+
+
+
+
+
+
+
+

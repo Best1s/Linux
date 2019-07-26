@@ -1,3 +1,28 @@
+移动光标
+Ctrl + b =	←		Ctrl + f = →
+Ctrl+Left-Arrow	Ctrl+Right-Arrow
+Ctrl + a	Ctrl + e
+
+删除
+Ctrl + d  = delete 		Ctrl + h = backspace
+Ctrl + w	ECS + d
+Ctrl + u 	Ctrl + k		
+Ctrl + y  恢复
+
+历史命令
+Ctrl + p  =  ↑			Ctrl + n = ↓      
+Ctrl + r   搜索 history
+Ctrl + I    =    TAB补全
+
+
+Ctrl + t 将光标位置的字符和前一个字符进行位置交换
+
+
+
+
+
+
+
 /etc/profile:此文件为系统的每个用户设置环境信息,当用户第一次登录时,该文件被执行.并从/etc/profile.d目录的配置文件中搜集shell的设置.
 
 /etc/bashrc:为每一个运行bash shell的用户执行此文件.当bash shell被打开时,该文件被读取.
@@ -19,6 +44,8 @@
 .zhrc 当用户使用 zshell，就会在/home/userName/目录下 产生 .zshrc 配置文件 可以通过修改这个文件配置环境变量。
 
 cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime    #change time
+
+
 # 单引号，双引号，反引号
 1.单引号 (' ') 单引号，不具有变量置换的功能，即单引号会告诉shell忽略所有的特殊字符
 
@@ -32,5 +59,14 @@ cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 20    #生成20个随机字符
 
 
 nginx 性能监控
-php-fpm 慢查询
+
+
+
+iftop -i eth1 -n -P
+
+ifocnfig
+ifstat
+watch cat /proc/net/dev
+
+			
 mysql 慢查询

@@ -7,6 +7,8 @@ opcache.interned_strings_buffer=40
 opcache.max_accelerated_files=4000
 opcache.fast_shutdown=1
 zend_extension="opcache.so"
+
+
 #php-fpm
 pm = dynamic
 pm.max_children = 30   //设置子进程最大数值
@@ -14,3 +16,37 @@ pm.start_servers = 10   //php-fpm启动起始进程数
 pm.min_spare_servers = 10   //php-fpm的最小空闲进程数
 pm.max_spare_servers = 24   //php-fpm的最大空闲进程数
 pm.max_requests = 500   //所有子进程重启时间
+
+
+php-fpm 慢查询  grep -v "^$" php-fpm.slow.log | cut -d " " -f 3,2 | sort | uniq -c | sort -k1,1nr | head -n 50
+　　　　参数解释:
+
+                sort:  对单词进行排序
+                uniq -c:  显示唯一的行，并在每行行首加上本行在文件中出现的次数
+                sort -k1,1nr:  按照第一个字段，数值排序，且为逆序
+                head -10:  取前10行数据
+		strace跟踪进程
+		nohup strace -T -p 13167 > 13167-strace.log &
+		　　　　参数说明:
+
+　　　　　  -c 统计每一系统调用的所执行的时间,次数和出错的次数等.
+                -d 输出strace关于标准错误的调试信息.
+                -f 跟踪由fork调用所产生的子进程.
+                -o filename,则所有进程的跟踪结果输出到相应的filename
+                -F 尝试跟踪vfork调用.在-f时,vfork不被跟踪.
+                -h 输出简要的帮助信息.
+                -i 输出系统调用的入口指针.
+                -q 禁止输出关于脱离的消息.
+                -r 打印出相对时间关于,,每一个系统调用.
+                -t 在输出中的每一行前加上时间信息.
+                -tt 在输出中的每一行前加上时间信息,微秒级.
+                -ttt 微秒级输出,以秒了表示时间.
+                -T 显示每一调用所耗的时间.
+                -v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出.
+                -V 输出strace的版本信息.
+                -x 以十六进制形式输出非标准字符串
+                -xx 所有字符串以十六进制形式输出.
+                -a column
+                设置返回值的输出位置.默认为40.
+                -e execve 只记录 execve 这类系统调用
+                -p 主进程号

@@ -1,0 +1,51 @@
+yum -y install subversion
+svnserve --version
+
+创建仓库目录
+
+# mkdir -p /svn/project 
+
+创建项目
+
+# svnadmin create svn/project/
+5.检查是否创建成功
+# cd svn/project/
+# ll
+
+进入project文件夹进行查看可看到文件夹包含了conf、db、format、hooks、locks、 README.txt等文件，说明一个SVN库已经建立。
+
+1.进入conf目录会看到3个配置文件
+
+进入上面生成的文件夹conf下，进行配置, 有以下几个文件authz，passwd，svnserve.conf。其中authz 是权限控制，可以设置哪些用户可以访问哪些目录，passwd是设置用户和密码的，svnserve是设置svn相关的操作，生成的文件中都有英文注释说明。
+
+2.配置 svnserv.conf
+
+# vim svnserv.conf
+[general]
+anon-access = none     # 使非授权用户无法访问
+auth-access = write    # 使授权用户有写权限
+password-db = password   # 用户密码文件
+authz-db = authz       # 访问控制文件
+realm = /home/svn/project # 认证命名空间，subversion会在认证提示里显示，并且作为凭证缓存的关键字。
+# 采用默认配置，以上语句都必须顶格写，左侧不能留空格，否则会出错。
+3.配置passwd(格式：帐号=密码)
+
+### This file is an example password file for svnserve.
+### Its format is similar to that of svnserve.conf. As shown in the
+### example below it contains one section labelled [users].
+### The name and password for each user follow, one account per line.
+
+[users]
+username = 123123
+4.配置authz权限
+
+# 在末尾添加如下代码
+[/]
+username = rw 
+# r：读，w：写
+注：还有更加细致的权限配置,可以查看SVN文档。
+
+5.启动SVN服务
+
+# svnserve -d -r /home/svn
+注：默认的端口是3690，设置好防火墙。

@@ -4,7 +4,9 @@ CREATE USER user[IDENTIFIED BY [PASSWORD] 'password'],
 [user[IDENTIFIED BY [PASSWORD] 'password']]...
 
 INSERT INTO mysql.user(Host,User,Password,ssl_cipher,x509_issuer,x509_subject) VALUES('%','newuser1',PASSWORD('123456'),'','','')
+
 FLUSH PRIVILEGES
+
 GRANT priv_type ON database.table
 TO user[IDENTIFIED BY [PASSWORD] 'password']
 [,user [IDENTIFIED BY [PASSWORD] 'password']...]
@@ -80,3 +82,36 @@ show processlist\G  或 show full processlist;
 
 
 事务处理  将步骤打包成一件事情来做， 失败一步 数据将回滚之前状态
+
+
+1、恢复到指定数据库
+mysql -hhostname -uusername -ppassword databasename < backupfile.sql
+
+2、还原压缩的MySQL数据备份文件
+gunzip < backupfile.sql.gz | mysql -uusername -ppassword databasename
+
+3、直接将备份导入到新的数据库
+mysqldump -uusername -ppassword databasename | mysql -host=192.168.1.101 -C databasename
+
+4、使用source导入sql文件
+mysql > use cmdb
+
+
+mysql > source /data/cmdb_backup.sql
+
+
+
+
+
+
+
+
+
+
+MySQL防误删插件Recycle_bin
+
+
+
+
+
+

@@ -1,0 +1,124 @@
+开启慢查询的方法
+1) 在配置文件中加入    配置完毕需要重启
+log_slow_queries = ON
+log-slow-queries = /var/lib/mysql/slow.log    #日志目录
+long_query_time = 1                          #记录下查询时间查过1秒
+log-queries-not-using-indexes -- 表示记录没有使用索引的查询
+
+
+2)	在mysql中
+mysql> show variables like 'long_query_time'; -- 默认情况下，mysql认为10秒才是一个慢查询
+
+mysql> set long_query_time=1; -- 修改慢查询时间,只能当前会话有效;
+mysql> set global slow_query_log='ON';-- 启用慢查询 ,加上global，不然会报错的;
+
+
+一、慢查询
+
+mysql> show global status;
+
+可以列出MySQL服务器运行各种状态值，另外，查询MySQL服务器配置信息语句：
+
+
+mysql> show variables;
+
+
+
+
+
+show status -- 显示全部mysql操作信息
+
+show status like "com_insert%"; -- 获得mysql的插入次数;
+
+show status like "com_delete%"; -- 获得mysql的删除次数;
+
+show status like "com_select%"; -- 获得mysql的查询次数;
+
+show status like "uptime"; -- 获得mysql服务器运行时间
+
+show status like 'connections'; -- 获得mysql连接次数
+
+
+mysql> show variables like '%slow%';
+
++---------------------------+-------------------------+
+| Variable_name             | Value                   |
++---------------------------+-------------------------+
+| log_slow_admin_statements | OFF                     |
+| log_slow_slave_statements | OFF                     |
+| slow_launch_time          | 2                       |
+| slow_query_log            | ON                      |
+| slow_query_log_file       | /var/lib/mysql/slow.log |
++---------------------------+-------------------------+
+
+mysql> show global status like '%slow%';
++---------------------+---------+
+| Variable_name       | Value   |
++---------------------+---------+
+| Slow_launch_threads | 0       |
+| Slow_queries        | 2012770 |
++---------------------+---------+
+2 rows in set (0.00 sec)
+
+
+二：分析慢查询日志
+
+1. 截取一段慢查询日志：
+
+
+# Time: 2019-04-22T01:53:04.194728Z
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 2670981
+# Query_time: 1.180297  Lock_time: 0.000031 Rows_sent: 1  Rows_examined: 1493332
+SET timestamp=1163760384;
+SELECT COUNT(*) AS tp_count FROM `bz_users` WHERE  `wechat_id` = 'oMPWQ53wKVh3xxxxxxxxx' LIMIT 1;
+# Time: 2019-04-22T01:53:04.200341Z
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 2670975
+# Query_time: 1.190742  Lock_time: 0.000033 Rows_sent: 1  Rows_examined: 1493332
+SET timestamp=1163760384;
+SELECT COUNT(*) AS tp_count FROM `bz_users` WHERE  `wechat_id` = 'oMPWQ50vDtxxxxxxxxxxxxx' LIMIT 1;
+
+
+Query_time (慢查询语句的查询时间)  都超过了设置的 1s,
+
+Rows_sent (慢查询返回记录) 这里只返回了 1 条
+
+Rows_examined （慢查询扫描过的行数）  1493332    ->     通过这里大概可以看出问题很大
+
+
+
+2.将这个SQL语句放到数据库去执行，并使用EXPLAIN分析 看下执行计划。
+
+explain用法
+
+EXPLAIN tbl_name或：EXPLAIN [EXTENDED] SELECT select_options
+
+EXPLAIN SELECT COUNT(*) AS tp_count FROM `bz_users` WHERE  `wechat_id` = 'oMPWQ50vDtxxxxxxxxxxxxx' LIMIT 1\G
+
+
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: bz_users
+   partitions: NULL
+         type: ALL
+possible_keys: NULL
+          key: NULL
+      key_len: NULL
+          ref: NULL
+         rows: 1376804
+     filtered: 10.00
+        Extra: Using where
+1 row in set, 1 warning (0.00 sec)
+
+
+https://www.cnblogs.com/sunxun/p/9673788.html
+
+
+
+
+
+mysqldumpslow -s r -t 10 /slowquery.log #slow记录最多的10个语句
+
+推荐用分析日志工具 – mysqlsla
+
+wget http://hackmysql.com/scripts/mysqlsla-2.03.tar.gz

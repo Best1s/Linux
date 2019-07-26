@@ -1,4 +1,4 @@
-1.CentOS系统：创建repo的yum储存库 /etc/yum.repos.d/nginx.repo
+﻿1.CentOS系统：创建repo的yum储存库 /etc/yum.repos.d/nginx.repo
 [nginx-stable]
 name=nginx stable repo
 baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
@@ -14,3 +14,4 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 2：yum -y install yum-utils
 3：yum -y install nginx
+
