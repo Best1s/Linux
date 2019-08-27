@@ -3,3 +3,6 @@ editing
 finsh!
 test!
 push
+add test
+add test again!
+finsh!
