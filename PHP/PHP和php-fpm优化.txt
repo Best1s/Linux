@@ -50,3 +50,56 @@ php-fpm 慢查询  grep -v "^$" php-fpm.slow.log | cut -d " " -f 3,2 | sort | un
                 设置返回值的输出位置.默认为40.
                 -e execve 只记录 execve 这类系统调用
                 -p 主进程号
+				
+				
+php-fpm.conf
+
+[global]
+pid = /www/server/php/72/var/run/php-fpm.pid
+error_log = /www/server/php/72/var/log/php-fpm.log
+log_level = notice
+
+[www]
+listen = /tmp/php-cgi-72.sock
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+listen.owner = www
+listen.group = www
+listen.mode = 0666
+user = www
+group = www
+pm = dynamic
+pm.status_path = /phpfpm_72_status
+pm.max_children = 150
+pm.start_servers = 30
+pm.min_spare_servers = 30
+pm.max_spare_servers = 150
+request_terminate_timeout = 100
+request_slowlog_timeout = 30
+slowlog = var/log/slow.log
+
+
+版本2
+php-fpm.conf
+
+
+[global]
+error_log = log/php-fpm7.2.log
+include=/etc/php-fpm.d/www.conf
+
+www.conf
+
+[www-7.2.0]
+user = www
+group = www
+listen = 127.0.0.1:7200
+pm = dynamic
+pm.max_children = 1090
+pm.start_servers = 256
+pm.min_spare_servers = 256
+pm.max_spare_servers = 1090
+pm.max_requests = 16000
+slowlog = var/log/slow_7200.log
+request_slowlog_timeout = 3
+php_admin_value[error_log] = /var/log/error_fpm-php.www.log
+php_admin_value[memory_limit] = 8192M

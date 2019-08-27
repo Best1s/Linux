@@ -16,6 +16,9 @@ git remote add origin  http://github.com/xxxxx
 git remote rm <主机名>
 git fetch <远程主机名>
 git status
+
+git tag -a 标签名 -m "附注信息"
+
 <<<<<<< HEAD
 A: 你本地新增的文件（服务器上没有）.
 C: 文件的一个新拷贝.

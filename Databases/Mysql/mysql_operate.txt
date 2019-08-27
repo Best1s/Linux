@@ -101,11 +101,47 @@ mysql > source /data/cmdb_backup.sql
 
 
 
+mysql-bin和relay-bin 清除
+确认文件没用
+reset master;
+or
+reset slave;
 
 
+mysql Table 'xxxxx' is marked as crashed and should be repaired  修复
+
+1、mysqlcheck -r 数据库名 表名 -uroot -p
+
+命令格式
+Usage: mysqlcheck [OPTIONS] database [tables] 
+OR mysqlcheck [OPTIONS] –databases DB1 [DB2 DB3…] 
+OR mysqlcheck [OPTIONS] –all-databases
+参数
+A, –all-databases —选择所有的库 
+-a, –analyze —分析表 
+-B, –databases —选择多个库 
+-c, –check —检查表 
+-o, –optimize —-优化表 
+-C, –check-only-changed —最后一次检查之后变动的表 
+–auto-repair —-自动修复表 
+-g, –check-upgrade —检查表是否有版本变更，可用 auto-repair修复 
+-F, –fast —只检查没有正常关闭的表 
+-f, –force —忽悠错误，强制执行 
+-e, –extended —表的百分百完全检查，速度缓慢 
+-m, –medium-check —近似完全检查，速度比 –extended稍快 
+-q, –quick —最快的检查方式，在repair 时使用该选项，则只会修复 index tree 
+-r, –repair —修复表 
+-s, –silent —只打印错误信息 
+-V, –version —显示版本
 
 
+2、myisamchk
+使用myisamchk必须暂时停止MySQL服务器。例如，我们要检修test数据库。执行以下操作：
 
+# service mysqld stop ;
+# myisamchk -r /var/lib/mysql/test/*MYI
+# service mysqld start;
+myisamchk会自动检查并修复数据表中的索引错误。
 
 
 MySQL防误删插件Recycle_bin

@@ -1,3 +1,6 @@
+
+
+
 location 修饰符
 / 			通用匹配，任何请求都会匹配到。
 =			精确匹配并停止
@@ -30,3 +33,25 @@ server {
 Nginx 的虚拟主机是通过HTTP请求中的Host值来找到对应的虚拟主机配置，如果找不到呢？
 那 Nginx 就会将请求送到指定了 default_server 的 节点来处理，如果没有指定为 default_server 的话，
 就跑到 localhost 的节点，如果没有 localhost 的节点，那只好 404 了。
+
+
+Nginx重新添加模块的两种方法
+
+添加模块  重新编译安装
+1： nginx -V
+./configure  nginx -V的参数  加新的nginx模块  --add-modul=第三方模块的路径
+make
+注意： 千万不要make install  否则会覆盖
+替换 nginx二进制文件
+load_module modules / ngx_mail_module.so;    加载模块
+
+nginx -t 
+nginx -s reload 
+
+2  安装openresty
+http://openresty.org/en/download.html
+
+
+
+
+

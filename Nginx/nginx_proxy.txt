@@ -189,13 +189,34 @@ Nginx的Wiki网站（http://wiki.nginx.org/Modules ）
 
 
 
+tips:
+
+1. proxy_pass 配置的url后面，不加'/'，那么重定向后，追加location后的路径。
+2. proxy_pass配置的url后面，加'/'，那么重定向后，整个替换location后的路径。
+
+如果 proxy_pass 的 url 不带 uri
+如果尾部是"/"，则会截断匹配的uri    		location /xxxx   截断xxxx
+如果尾部不是"/"，则不会截断匹配的uri		location /xxxx   不截断xxxx
+如果proxy_pass的url带uri，则会截断匹配的uri
+
+https://www.runoob.com/note/29162
+
+
+
+反向代理透传客户端IP设置
+proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 
 
 
-
-
-
+modprobe ipv6
+ip tunnel add he-ipv6 mode sit remote 72.52.104.74 local 47.94.236.158 ttl 255
+ip link set he-ipv6 up
+ip addr add 2001:470:1f04:cf::2/64 dev he-ipv6
+ip route add ::/0 dev he-ipv6
+ip -f inet6 addr
 
 
 
