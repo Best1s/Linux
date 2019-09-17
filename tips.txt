@@ -64,9 +64,10 @@ nginx 性能监控
 
 iftop -i eth1 -n -P
 
-ifocnfig
+ifconfig
 ifstat
 watch cat /proc/net/dev
 
+sar
 			
 mysql 慢查询
