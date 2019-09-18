@@ -17,11 +17,21 @@ Ctrl + I    =    TAB补全
 
 Ctrl + t 将光标位置的字符和前一个字符进行位置交换
 
+network
+nmcli - command-line tool for controlling NetworkManager
+mii-tool - view, manipulate media-independent interface status
+ethtool - query or control network driver and hardware settings
+mtr
 
+查看当前IP个数和每IP连接数： 
+netstat -an | grep 80 | awk '{print $5}' | awk 'BEGIN {FS=":"} NF==2 {print $1} NF==5 {print $4}' | sort | uniq -c | sort -n
 
-
-
-
+只查看该进程：ps -ef | grep 11345
+查看该进程打开的文件：lsof -p 11345
+查看内存分配：lcat /proc/11345/maps
+查看堆栈：pstack 11345
+查看发出的系统调用:strace -p 11345
+查看调用库函数:ltrace -p 11345
 
 /etc/profile:此文件为系统的每个用户设置环境信息,当用户第一次登录时,该文件被执行.并从/etc/profile.d目录的配置文件中搜集shell的设置.
 

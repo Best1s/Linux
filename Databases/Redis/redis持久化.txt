@@ -17,3 +17,4 @@ redis主从
 
 从服务器配置    slaveof   <ip>  	<port>
 masterauth 	<密码>
+
