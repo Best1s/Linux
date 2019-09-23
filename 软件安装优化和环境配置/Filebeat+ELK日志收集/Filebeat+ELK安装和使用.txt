@@ -1,0 +1,64 @@
+﻿下载地址 https://www.elastic.co/cn/downloads/
+
+elasticsearch 权威指南 https://www.elastic.co/guide/en/elasticsearch/reference/7.3/documents-indices.html
+
+ELK 是 ElasticSearch、 LogStash、 Kibana 三个开源工具的简称，现在还包括 Beats，其分工如下:
+
+
+
+1:Elasticsearch存储Logstash传送的结构化数据，提供给Kibana。开源的分布式搜索引擎，负责数据的存储、检索和分析
+最低需要java 11环境，必须普通用户运行    elasticsearch -d 后台运行
+9200端口是Elasticsearch对外的HTTP协议的API   9300集群通讯端口
+使用 curl 'http://localhost:9200/?pretty' 测试 Elasticsearch 是否启动成功
+
+
+
+2:Logstash部署至服务主机，对各个服务的日志进行采集、过滤、推送。 负责数据的收集与处理
+ 需要java环境 配置logstash，并将结果输出到elasticsearch     启动logstash -f  xxx.conf   也可以用supervisor进行进程监控
+默认端口9600
+input { stdin { } }
+output {
+  elasticsearch {hosts => "localhost" }
+  stdout { codec=> rubydebug }
+}
+
+
+
+3:Kibana提供用户UIweb页面进行，数据展示和分析形成图表等。负责数据的可视化操作 自带NODE.JS  web服务器
+
+启动kibana		nohup /xxx/kibana-7.3.2-linux-x86_64/bin/kibana &
+端口 5601
+
+4 Filebeat：ELK 协议栈的新成员，一个轻量级开源日志文件数据搜集器  
+需要采集日志数据的 server 上安装 Filebeat 并指定日志目录或日志文件后，Filebeat就能读取数据，
+迅速发送到Logstash 进行解析，亦或直接发送到 Elasticsearch 进行集中式存储和分析
+
+运行 ./filebeat -e -c filebeat.yml
+
+
+
+* logstash至少要有1G内存才能执行
+
+
+ Elasticsearch 请求和任何 HTTP 请求一样由若干相同的部件组成：
+ curl -X<VERB> '<PROTOCOL>://<HOST>:<PORT>/<PATH>?<QUERY_STRING>' -d '<BODY>'
+ 
+- VERB		适当的 HTTP 方法 或 谓词 : GET`、 `POST`、 `PUT`、 `HEAD 或者 `DELETE`。
+
+- PROTOCOL	http 或者 https`（如果你在 Elasticsearch 前面有一个 `https 代理）
+
+- HOST		Elasticsearch 集群中任意节点的主机名，或者用 localhost 代表本地机器上的节点。
+
+- PORT		运行 Elasticsearch HTTP 服务的端口号，默认是 9200 。
+
+-PATH		API 的终端路径（例如 _count 将返回集群中文档数量）。
+			Path 可能包含多个组件，例如：_cluster/stats 和 _nodes/stats/jvm 。
+
+- QUERY_STRING	任意可选的查询字符串参数 (例如 ?pretty 将格式化地输出 JSON 返回值，使其更容易阅读)
+
+- BODY	一个 JSON 格式的请求体 (如果请求需要的话)
+
+
+
+
+ 

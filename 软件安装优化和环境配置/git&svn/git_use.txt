@@ -53,3 +53,9 @@ git reset	--hard   需要回滚版本号
 强制提交 git push -f origin master  #本地版本比仓库版本旧 需要强制提交    
 git reset #可以生成新的旧版本 保留后面的版本
 使用“git revert -n 版本号”反做，并使用“git commit -m 版本名”提交：#注意： 这里可能会出现冲突，那么需要手动修改冲突的文件。而且要git add 文件名。
+
+
+
+
+免密验证！
+url = http://user:password@xxxx.com/expand/xxxx.git

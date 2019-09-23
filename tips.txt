@@ -81,3 +81,4 @@ watch cat /proc/net/dev
 sar
 			
 mysql 慢查询
+

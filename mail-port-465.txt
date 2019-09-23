@@ -45,9 +45,8 @@ curl -d "Uid=$user&Key=$key&smsMob=$number&smsText=$text" "http://utf8.api.smsch
 #Wechat receve alert
 #variable text is tittle
 #variable desp is text
-addr="https://sc.ftqq.com/SCU48988T5fae09c6a3961f05aae95dc3108e37985cb596f02ab31.send"
+addr="https://sc.ftqq.com/SCU48988T5xxx31.send"
 a=$3 > /dev/null 2>&1
-#get https://sc.ftqq.com/SCU48988T5fae09c6a3961f05aae95dc3108e37985cb596f02ab31.send?text=$1&desp=$2
 curl -d "text=$1&desp=$2" $addr > /dev/null 2>&1
 
 
