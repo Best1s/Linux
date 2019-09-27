@@ -1,0 +1,15 @@
+Logstash 配置文件有三部分
+input {
+}
+filter {
+	
+}
+output {
+	studio{
+	.....
+	}
+}
+
+
+grok 模型位置
+xxxxxx/vendor/bundle/jruby/2.5.0/gems/logstash-patterns-core-4.1.2/patterns

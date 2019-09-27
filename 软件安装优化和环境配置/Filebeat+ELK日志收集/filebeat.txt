@@ -1,0 +1,33 @@
+filebeat 两个主要组件组成； prospector 和harvester
+
+· harvester:
+		复制读取单个文件内容
+		如果文件被删除或重命名，filebeat将继续读取文件
+· prospector
+		prospector负责管理harvester并找到所有的要读取数据的文件来源。
+		如果输入类型为日志，则查找器将查找路径所有文件，并为每个文件启动一个 harvester
+		filebeat 目前支持两种类型 log 和 stdin
+filebeat保持文件的状态
+		filebeat保持每个文件的状态并经常将状态刷新到磁盘上的注册文件中。
+		该状态用于记住 harvester正在读取的最后偏移量，并确保发送所有日志行。
+		如果输出无法访问，filebeat会跟踪最后发送的行，并在输出再次可用时继续读取文件。
+		保存目录 data/registry/filebeat/data.json
+		
+		
+inputs支持的type有：
+
+log
+sdtin
+redis
+udp
+tcp
+syslog
+
+outputs支持的类型有：
+
+logstash
+elasticsearch
+kafka
+file
+redis
+console

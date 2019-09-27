@@ -1,0 +1,321 @@
+创建索引  put请求   http://localhost:9200/索引名字  headers 类型为  application/json
+
+
+{
+"settings": {
+"index": {
+"number_of_shards": "2",
+"number_of_replicas": "0"
+}
+}
+}
+
+删除索引  delete请求   http://localhost:9200/索引名字
+
+DELETE /索引名字
+{
+	"acknowledged": true
+}
+
+插入数据  post /索引/类型/id      id可自定义唯一标识符号，可不传，系统会自定义个32长度_id字段
+
+更新数据  覆盖   PUT /索引/类型/id     字段一样 值不一样
+
+更新数据  局部   POST /索引/类型/id/_update
+需要 doc 包装修改的字段
+
+
+DSL搜索   POST /索引/类型/_search   默认返回10条
+{
+	"query": {
+		"match": {
+			"xxx":"xxx"
+		}
+	},
+	#字段高亮显示
+	"highlight": {
+		"filelds": {
+			"xxx": {}
+		}
+	}
+	#聚合
+	“xxx聚合名字”: {
+		"all_interests": {
+			"terms": {
+				"field": "xxx字段"
+			}
+		}
+	}
+}
+
+
+/test_index/xxx/id?pretty   美化结果
+/test_index/xxx/id?_source=xxx,xxx2  只要xxx,xxx2字段
+/test_index/xxx/id?_source?_source=xxx,xxx2 只要xxx,xxx2字段不要系统字段
+
+
+head 请求  /test_index/xxx/id   判断文档是否存在
+
+
+批量操作，查询 删除 更新，插入
+查询  post  /test_index/xxx/_mget
+{
+	"ids": {"id1","id2"}
+}
+插入  删除  都是post请求	/test_index/xxx/_bulk   最后一行要有空行
+
+{"create":{"_index":"test_index","_type":"user","_id":"1111"}}
+{"id":"1111","name":"lisi","age":22,"sex":"man"}
+{"create":{"_index":"test_index","_type":"user","_id":"1112"}}
+{"id":"1112","name":"lisi","age":23,"sex":"man"}
+{"create":{"_index":"test_index","_type":"user","_id":"1113"}}
+{"id":"1113","name":"lisi","age":24,"sex":"man"}
+
+
+
+{"delete":{"_index":"test_index","_type":"user","_id":"1111"}}
+{"delete":{"_index":"test_index","_type":"user","_id":"1112"}}
+{"delete":{"_index":"test_index","_type":"user","_id":"1113"}}
+
+
+一次请求多少性能最高？
+
+
+分页  from和size参数
+size 默认10
+from 默认0
+
+
+GET /test_index/xxx/_search?size=5
+GET /test_index/xxx/_search?size=5&from=2
+
+*分页太深或一次请求太多的结果，结果会在返回前被排序，一个搜索涉及多个分片，
+每个分片生成自己的排序结果，需要集中起来排序保证整体排序正确
+
+集群中深度分页
+5个主分片中请求第一页1到10个结果，
+每个分片产生自己最顶端的10个结果返回给请求节点，它再这所有的50个结果中选出顶端的10个结果
+
+
+假设请求第1000页，结果为第10001到10010，工作方式相同，每个分片产生顶端的10010个结果
+然后请求节点排序这50050个结果取第10001到10010的值  丢弃50040个
+
+
+映射(mapping)
+
+https://blog.csdn.net/qq_24365213/article/details/79225306
+
+
+JSON数据			ES中的数据类型				ES中的表示数据类型
+
+null				不会添加字段				 	
+
+true or false			"boolean"					boolean
+
+floating point number	double						float,double
+
+integer					long						byte,short,integer,long
+
+object					object
+
+array				依赖于第一个非null得值
+
+string				如果通过了date检测，则为date	  string,text,keyword
+					如果通过了numeric检测，则为Number   
+
+“2019-09-08”		date								date
+
+
+·string类型 ES5.x以后不在支持 由text和keyword类型替代
+·text类型，一个字段被全文搜索的   需要分词的
+·keyword类型   适用于结构化的字段 不需要分词
+
+
+
+
+
+
+
+
+创建明确的类型索引：  PUT  /索引
+{
+	"settings": {
+		"index": {
+			"number_of_shards": "2",
+			"number_of_replicas": "0"
+		}
+	}，
+	"mapping": {
+		"xxx_类型": {
+			“person”
+				"xxx":{
+					"type": "long"
+				}
+				"xxx":{
+					"type": "text"
+				}			
+				"xxx":{
+					"type": "keyword"
+				}			
+		
+		}
+	}
+}
+
+查询映射
+GET /test_index/mapping
+
+结构化查询
+term
+
+POST  /索引/mapping_类型/_search
+{
+	"query": {
+		"term": {
+			"xxx": xxx
+		}
+	}
+}
+
+{
+	"query": {
+		"terms": {
+			"xxx": [xxx,xxx,xxx]
+		}
+	}
+}
+gt 大于
+gte 大于等于
+lt	小于
+lte	小于等于
+
+{
+	"query": {
+		"range": {
+			"xxx":{
+				"gte": 20,
+				"lte": 30	
+			}
+		}
+	}
+}
+
+exists 查询  是否包含指定字段
+{
+	"query": {
+		"exists": {
+			"field": "xxx"
+		}
+	}
+}
+
+match 查询  匹配
+
+{
+	"query": {
+		"match": {
+			"xxx": "xxx"
+		}
+	}
+}
+
+boolean 查询
+{
+	"query": {
+		"bool": {
+			"must": {
+				"match"{
+					"xxx": "xxx"
+				}
+			}
+			"must_not": {
+				"match"{
+					"xxx": "xxx"
+				}
+			}			
+		}
+	}
+}
+
+filter 过滤查询
+{
+	"query": {
+		"bool": {
+			"filter": {
+				"term": {
+					"xxx": "xxxx"
+				}
+			}
+		}
+	}
+}
+查询和过滤区别   match	filter
+
+过滤会询问每个字段值包含的特定值
+
+查询会询问每个文档的字段值于特定值的匹配程度如何
+	查询语句会计算每个文档与查询语句的相关性，给出个相关性评分_score，并按照相关性对匹配的文档进行排序
+	这种评分非常使用一个完全没有配置结果的文本搜索
+一般来说 查询比过滤更耗时间， 查询结果不能缓存
+
+精确匹配用过滤 可以缓存数据  全文搜索用查询
+
+
+中文分词
+
+POST /_analyze
+{
+	"analyzer":"standard"    #标准分词器  英文  中文会被分成每个字
+	"text":"xxxxxxxx xxxxxxx"
+
+}
+
+POST /索引/_analyze
+{
+	"analyzer":"standard"
+	"field":"字段"
+	"text":"xxxxxxxx xxxxxxx"
+
+}
+
+
+中文分词器 ik jieba THULAC
+
+https://github.com/medcl/elasticsearch-analysis-ik
+
+解压到 /elasticsearch/plugins/ik 目录
+{
+	"analyzer":"ik_max_word"
+
+	"text":"xxxxxxxx xxxxxxx"
+
+}
+单词搜索
+多词搜索
+组合搜索
+搜索权重
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

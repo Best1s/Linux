@@ -8,9 +8,56 @@ ELK 是 ElasticSearch、 LogStash、 Kibana 三个开源工具的简称，现在
 
 1:Elasticsearch存储Logstash传送的结构化数据，提供给Kibana。开源的分布式搜索引擎，负责数据的存储、检索和分析
 最低需要java 11环境，必须普通用户运行    elasticsearch -d 后台运行
+
+配置/etc/security/limits.conf 
+root soft nofile 65535
+root hard nofile 65535
+* soft nofile 65535
+* hard nofile 131072
+
+/etc/sysctl.conf  添加vm.max_map_count=655360
+
+/etc/security/limits.d/   nproc  进程中的线程数最少4096
+
+如果前后端分离  需配置CORS  在配置文件 elasticsearch.yml中加入
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+第三方插件elasticsearch head
+
+
 9200端口是Elasticsearch对外的HTTP协议的API   9300集群通讯端口
 使用 curl 'http://localhost:9200/?pretty' 测试 Elasticsearch 是否启动成功
 
+*概念
+索引（index） 分片（shard） 副本（replica）
+每个索引有1个或多个分片，每个分片可以有多个副本。
+
+*文档 与 MongoDB 文档类似
+
+集群节点4中
+ master节点 node.master: true (默认为true) 有资格被选为master节点
+	控制整个集群的操作，比如创建，删除索引，管理其他非master节点
+	
+ data 节点  node.data: true 有资格被设置为data节点
+	执行数据相关的操作
+https://www.bilibili.com/blackboard/activity-XDTj0LNChQ.html
+ 客户端节点  node.master  和 node.data  属性为false
+	改节点不能作为master节点，也不能作为data节点
+	可以作为客户端节点，用于响应用户的请求，把请求转发到其他节点
+ 
+ 部落节点
+	当一个节点配置tribe.*的时候 它是一个特殊的客户端，可以连接多个集群，在所有的集群上执行搜索和其他操作。
+
+集群状态
+	green  所有分片，复制片都可用
+	yellow	所有分片，但不是所有复制片都可用
+	red		不是所有的主要分片都可用
+
+数据存储节点选择
+
+shard = hash(routing) % number_of_primary_shards
+	routing 字符串通过哈希函数生成一个数字，然后与主分片取余运算
 
 
 2:Logstash部署至服务主机，对各个服务的日志进行采集、过滤、推送。 负责数据的收集与处理
@@ -34,10 +81,13 @@ output {
 迅速发送到Logstash 进行解析，亦或直接发送到 Elasticsearch 进行集中式存储和分析
 
 运行 ./filebeat -e -c filebeat.yml
+  -e  输出到标准输出，默认输出到syslog和logs下
+  -c  指定配置文件
+  -d  输出debug信息
 
 
 
-* logstash至少要有1G内存才能执行
+* logstash至少要有1G内存才能执行  可修改
 
 
  Elasticsearch 请求和任何 HTTP 请求一样由若干相同的部件组成：
