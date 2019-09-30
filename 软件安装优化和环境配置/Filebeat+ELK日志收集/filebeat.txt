@@ -31,3 +31,33 @@ kafka
 file
 redis
 console
+
+
+
+filebeat.yml  文件配置
+filebeat.inputs:
+- type: log
+  enabled: false
+  paths:
+    - /var/log/*.log
+    #- c:\programdata\elasticsearch\logs\*
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+setup.kibana:
+  host: "172.18.174.32:5601"
+output.elasticsearch:
+  hosts: ["172.18.174.32:9200"]
+  username: "elastic"
+  password: "xxxxxx"
+processors:
+- add_locale:
+    format: "offset"
+- drop_fields:
+    fields: ["ecs","host","containerized","agent","architecture","input"]
+	
+	
+*模块开启参考文档 https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-modules.html

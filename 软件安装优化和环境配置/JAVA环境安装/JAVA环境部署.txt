@@ -1,0 +1,9 @@
+1，	部署java环境。https://www.java.com/en/download/manual.jsp
+	https://www.oracle.com/technetwork/java/javase/downloads/index.html
+/etc/profile     或者使用的用户下的.bash_profile	
+export JAVA_HOME=/usr/local/server/java/jdk1.8.0_221
+export PATH=$PATH:$JAVA_HOME/bin 
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+
+*注意  CLASSPATH=后不要少点

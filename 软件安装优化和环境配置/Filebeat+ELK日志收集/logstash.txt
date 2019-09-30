@@ -13,3 +13,84 @@ output {
 
 grok 模型位置
 xxxxxx/vendor/bundle/jruby/2.5.0/gems/logstash-patterns-core-4.1.2/patterns
+
+
+logstash 配置文件
+#input {
+#  file {
+#    path => "/tmp/elk.log"
+#    start_position => "beginning"
+#    type => "nginx-access"
+#  }
+#}
+input {
+  beats {
+#   host => "x.x.x.x"
+    port => "5044"
+#   codec => json
+  }
+}
+
+filter {
+  
+#  mutate {
+#    split => {"message"=>"-"}
+#  }
+# if [type] == "log" {
+
+  grok {
+    patterns_dir => "/usr/local/elk/logstash_patterns"
+#    
+#    match => { "message" => "%{IP:client} - (%{USERNAME:user}|-) \[%{HTTPDATE:timestamp}\] \"%{NOTSPACE:request} (%{URIPATH1:uri}|-|) HTTP/%{NUMBER:httpversion}\" %{NUMBER:status:int} %{NUMBER:body_sent:int} \"(?:%{GREEDYDATA:http_referrer}|-)\" \"%{GREEDYDATA:agent}\""
+    match => { "message" => "%{NGINXACCESS}"
+    }
+  }
+  if "beats_input_codec_plain_applied" in [tags]{
+    mutate{
+      remove_tag => ["beats_input_codec_plain_applied"]
+    }
+  }
+  if "_grokparsefailure" in [tags]{
+    mutate{
+      rename => ["message","parsefailure_message"]
+    }
+  }
+  if "_grokparsefailure" not in [tags]{ 
+    mutate{
+      remove_field => ["message"]
+    }
+  }
+
+# }
+}
+
+output {
+  stdout { 
+    codec => rubydebug
+#    codec => line { format => "%{message}"}
+  }
+}
+#output{
+#  elasticsearch {
+#    hosts => ["xxx:9200"]
+#  }
+#}
+#
+#
+* 配置索引名字要配置指定模板
+
+NGINXACCESS   patterns
+
+URIPARM1 [A-Za-z0-9$.+!*'|(){},~@#%&/=:;^\\_<>`?\-\[\]]*
+URIPATH1 (?:/[\\A-Za-z0-9$.+!*'(){},~:;=@#% \[\]_<>^\-&?]*)+
+HOSTNAME1 \b(?:[0-9A-Za-z_\-][0-9A-Za-z-_\-]{0,62})(?:\.(?:[0-9A-Za-z_\-][0-9A-Za-z-:\-_]{0,62}))*(\.?|\b)
+STATUS ([0-9.]{0,3}[, ]{0,2})+
+HOSTPORT1 (%{IPV4}:%{POSINT}[, ]{0,2})+
+FORWORD (?:%{IPV4}[,]?[ ]?)+|%{WORD}
+URIPARM [A-Za-z0-9$.+!*'|(){},~@#%&/=:;_?\-\[\]]*
+URIPATH (?:/[A-Za-z0-9$.+!*'(){},~:;=@#%&_\- ]*)+
+URI1 (%{URIPROTO}://)?(?:%{USER}(?::[^@]*)?@)?(?:%{URIHOST})?(?:%{URIPATHPARAM})?
+NGINXACCESS1 %{IP:clientip} - (%{USERNAME:user}|-) \[%{HTTPDATE:timestamp}\] \"%{WORD:request_verb} %{NOTSPACE:request} HTTP/%{NUMBER:httpversion}\" %{NUMBER:status:int} %{NUMBER:body_sent:int} \"-\" \"%{GREEDYDATA:agent}\" \"-\"
+# input source log is filebeat
+NGINXACCESS %{IP:clientip} - (%{USERNAME:user}|-) \[%{HTTPDATE:timestamp}\] \"%{NOTSPACE:request} (%{URIPATH1:uri}|-|) HTTP/%{NUMBER:httpversion}\" %{NUMBER:status:int} %{NUMBER:body_sent:int} \"(?:%{GREEDYDATA:http_referrer}|-)\" \"%{GREEDYDATA:agent}\"
+

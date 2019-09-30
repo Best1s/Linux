@@ -1,0 +1,21 @@
+官方文档 https://www.elastic.co/guide/en/elasticsearch/reference/7.3/security-settings.html
+
+es7.3版本     验证 X-pack 安全模式是否开启 curl http://localhost:9200/_security/_authenticate?pretty
+
+在elasticsearch.yml配置文件中加入  
+xpack.security.enabled: true
+xpack.license.self_generated.type: basic
+xpack.security.transport.ssl.enabled: true
+
+重启es
+
+es中的bin目录下 执行elasticsearch-setup-passwords   interactive   #手动生成密码       auto  自动生成密码
+
+
+
+验证   http://localhost:9200 -u elastic:elastic123
+
+
+elastic 为超级用户
+
+
