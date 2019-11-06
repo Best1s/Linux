@@ -1,0 +1,44 @@
+redis 持久化
+
+1)：快照模式   Snapshotting   （默认）
+触发格式
+save  秒数   键值数
+
+2)：aof模式   appendonly yes //启用 aof 持久化方式   默认关闭
+
+appendonly yes //启用 aof 持久化方式
+# appendfsync always //收到写命令就立即写入磁盘，最慢，但是保证完全的持久化
+appendfsync everysec //每秒钟写入磁盘一次，在性能和持久化方面做了很好的折中
+# appendfsync no //完全依赖 os，性能最好,依赖系统磁盘 速度最快
+
+dbfilename          #文件路径
+
+
+redis主从
+
+从服务器配置    slaveof   <ip>  	<port>
+masterauth 	<密码>
+
+
+
+
+redis集群配置
+https://redis.io/topics/cluster-tutorial
+
+
+其他：
+
+error_log  
+redis Can't save in background: fork: Cannot allocate memory详解
+修改/etc/sysctl.conf文件：
+vim /etc/sysctl.conf
+
+vm.overcommit_memory = 1
+sysctl -p
+
+info memory
+info stats
+
+
+
+

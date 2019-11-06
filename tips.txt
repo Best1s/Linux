@@ -70,9 +70,16 @@ cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 20    #生成20个随机字符
 
 nginx 性能监控
 
-
+network
 
 iftop -i eth1 -n -P
+
+nmcli - command-line tool for controlling NetworkManager
+mii-tool - view, manipulate media-independent interface status
+ethtool - query or control network driver and hardware settings
+
+查看当前IP个数和每IP连接数： 
+netstat -an | grep 80 | awk '{print $5}' | awk 'BEGIN {FS=":"} NF==2 {print $1} NF==5 {print $4}' | sort | uniq -c | sort -n
 
 ifconfig
 ifstat
@@ -80,5 +87,10 @@ watch cat /proc/net/dev
 
 sar
 			
-mysql 慢查询
+统计节点数文件
+for i in 路径 ;do echo $i;find $i |wc -l;done
+
+
+磁盘读写进程监控
+pidstat -d 1
 
