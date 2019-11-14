@@ -1,0 +1,23 @@
+一、防止php木马执行webshell
+ 
+打开safe_mode， 在，php.ini中设置 disable_functions= passthru，exec，shell_exec，system 二者选一即可，也可都选。
+
+ 
+二、防止跳出web目录 
+首先修改httpd.conf，如果你只允许你的php脚本程序在web目录里操作，还可以修改httpd.conf文件限制php的操作路径。
+比如你的web目录是/usr/local/apache/htdocs，那么在httpd.conf里加
+上这么几行： php_admin_value open_basedir /usr/local/apache/htdocs ，
+如果脚本要读取/usr/local/apache/htdocs以外的文件将不会被允许，如果错误显示打开的话会提示
+这样的错误： Warning: open_basedir restriction in effect. File is in wrong directory in /usr/local/apache/htdocs/open.php on line 4 等等。 
+
+三、防止php木马读写文件目录 
+在php.ini中的 disable_functions= passthru，exec，shell_exec，system 后面加上php处理文件的函数，主要有 fopen，mkdir，rmdir，chmod，unlink，dir，fopen，fread，fclose，fwrite，file_exists，closedir，is_dir，readdir.opendir，fileperms.copy，unlink，delfile 。即成为 disable_functions= passthru，exec，shell_exec，system，fopen，mkdir，rmdir，chmod，unlink，dir ，fopen，fread，fclose，fwrite，file_exists ，closedir，is_dir，readdir.opendir ，fileperms.copy，unlink，delfile 。 
+ok，大功告成，php木马拿我们没辙了，遗憾的是这样的话，利用文本数据库的那些东西就都不能用了。 如果是在windos平台下搭建的apache还需要注意一点，apache默认运行是system权限，必须给apache降降权限，如下： 
+net user apache f**kmicrosoft /add 
+net localgroup users apache /del 
+此时建立了一个不属于任何组的用户apche，只要打开计算机管理器-服务-apache服务的属性-log on-this account，在这里填入上面所建立的账户和密码，重启apache服务即可实现apache运行在低权限下。 
+总结：实际上还可以通过设置各个文件夹的权限，给每一个目录建立一个单独能读写的用户，来实现安全。当前很多虚拟主机提供商的流行配置方法，不过这种方法用于防止这里就显的有点大材小用了。只要我们管理员有安全意识，相对的禁闭不用的功能就可以保证网络安全的威胁。 
+
+禁用eval 函数
+禁掉eval可以用php的扩展 Suhosin：
+安装Suhosin后在php.ini中load进来Suhosin.so，再加上suhosin.executor.disable_eval = on

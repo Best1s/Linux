@@ -1,0 +1,21 @@
+确认http_realip_module模块已安装。作为负载均衡，Nginx使用http_realip_module模块获取真实IP。
+
+nginx -V | grep http_realip_module
+
+
+在配置文件中 修改日志记录格式log_format。
+在log_format中添加以下x-forwarded-for字段，替换原来的remote-address。
+
+log_format  main  '$http_x_forwarded_for - $remote_user [$time_local] "$request" ' 
+				  '$status $body_bytes_sent "$http_referer" ' '"$http_user_agent" ';
+				  
+				  
+如果不行 在修改Nginx对应server的配置。 在location / {}中添加以下内容。
+#set_real_ip_from ip_range1;
+#set_real_ip_from ip_range2;
+#...
+#set_real_ip_from ip_rangex;
+real_ip_header    X-Forwarded-For;
+
+说明 这里的ip_range1,2,...指高防IP的回源IP地址，需要添加多条。
+如果高防IP后还有WAF、CDN，则需要写WAF、CDN的回源IP地址，即需要写离源站最近的一层七层代理的回源IP段。

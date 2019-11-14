@@ -104,8 +104,8 @@ vrrp_instance VI_1 {          #定义VRRP热备实例
 
 virtual_server 192.168.202.200 23 {     #VIP地址，要和vrrp_instance模块中的virtual_ipaddress地址一致
 　　　　delay_loop 6   					#健康检查时间间隔 
-　　　　lb_algo rr 　　	#lvs调度算法rr|wrr|lc|wlc|lblc|sh|dh 
-　　　　lb_kind DR    	#负载均衡转发规则NAT|DR|RUN 
+　　　　lb_algo rr 　　			#lvs调度算法rr|wrr|lc|wlc|lblc|sh|dh 
+　　　　lb_kind DR    			#负载均衡转发规则NAT|DR|RUN 
 　　　　persistence_timeout 5 		#会话保持时间 
 　　　　protocol TCP    			#使用的协议 
 　　　　persistence_granularity <NETMASK> 	#lvs会话保持粒度 

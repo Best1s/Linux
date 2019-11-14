@@ -1,0 +1,36 @@
+① 可见性（库类别）
+
+私有库：只有被赋予权限的用户可见
+内部库：登录用户可以下载
+公开库：所有人可以下载
+
+———————————————————————————
+② 成员权限说明
+
+Guest(匿名用户) 	- 创建项目、写留言薄
+
+Reporter（报告人）	- 创建项目、写留言薄、拉项目、下载项目、创建代码片段
+
+Developer（开发者）	- 创建项目、写留言薄、拉项目、下载项目、创建代码片段、创建合并请求、
+					  创建新分支、推送不受保护的分支、移除不受保护的分支 、创建标签、编写wiki
+
+Master（管理者）	- 创建项目、写留言薄、拉项目、下载项目、创建代码片段、创建合并请求、创建新分支、
+					  推送不受保护的分支、移除不受保护的分支 、创建标签、编写wiki、增加团队成员、
+					  推送受保护的分支、移除受保护的分支、编辑项目、添加部署密钥、配置项目钩子
+					  
+Owner（所有者）		- 创建项目、写留言薄、拉项目、下载项目、创建代码片段、创建合并请求、创建新分支、
+					  推送不受保护的分支、移除不受保护的分支 、创建标签、编写wiki、增加团队成员、
+					  推送受保护的分支、移除受保护的分支、编辑项目、添加部署密钥、配置项目钩子、
+					  开关公有模式、将项目转移到另一个名称空间、删除项目
+
+如果是开发人员选择Developer即可，只是查看权限，选择Guest即可
+
+③ Protected Branches
+
+(1) 四个作用
+
+it prevents its creation, if not already created, from everybody except users with Maintainer permission
+it prevents pushes from everybody except users with Maintainer permission
+it prevents anyone from force pushing to the branch
+it prevents anyone from deleting the branch
+Note: A GitLab admin is allowed to push to the protected branches.

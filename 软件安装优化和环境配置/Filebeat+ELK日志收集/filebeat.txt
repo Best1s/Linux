@@ -1,3 +1,9 @@
+配置好文件后启动filebeat     
+	filebeat setup
+    nohup filebeat -e -c filebeat.yml &
+
+
+
 filebeat 两个主要组件组成； prospector 和harvester
 
 · harvester:

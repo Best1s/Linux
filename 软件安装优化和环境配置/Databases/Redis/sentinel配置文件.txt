@@ -1,0 +1,31 @@
+port 26379
+daemonize yes
+pidfile "/var/run/redis-sentinel.pid"
+logfile "/var/log/sentinel.log"
+# 定义工作目录
+dir /tmp
+
+# 定义Redis主的别名, IP, 端口，这里的2指的是需要至少2个Sentinel认为主Redis挂了才最终会采取下一步行为
+sentinel monitor mymaster 127.0.0.1 6379 2
+
+# 如果mymaster 30秒内没有响应，则认为其主观失效
+sentinel down-after-milliseconds mymaster 30000
+
+
+# 如果master重新选出来后，其它slave节点能同时并行从新master同步数据的台数有多少个，
+#显然该值越大，所有slave节点完成同步切换的整体速度越快，但如果此时正好有人在访问这些slave，
+#可能造成读取失败，影响面会更广。最保守的设置为1，同一时间，只能有一台干这件事，
+#这样其它slave还能继续服务，但是所有slave全部完成缓存更新同步的进程将变慢。
+sentinel parallel-syncs mymaster 1
+
+
+
+# 该参数指定一个时间段，在该时间段内没有实现故障转移成功，则会再一次发起故障转移的操作，单位毫秒
+sentinel failover-timeout mymaster 180000
+
+# 不允许使用SENTINEL SET设置notification-script和client-reconfig-script。
+sentinel deny-scripts-reconfig yes
+
+
+
+启动的顺序：主Redis --> 从Redis --> Sentinel1/2/3

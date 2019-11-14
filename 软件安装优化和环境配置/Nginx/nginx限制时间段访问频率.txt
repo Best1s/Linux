@@ -1,0 +1,60 @@
+nginx可以通过ngx_http_limit_conn_module和ngx_http_limit_req_module配置来限制ip在同一时间段的访问次数.
+
+ngx_http_limit_conn_module：该模块用于限制每个定义的密钥的连接数，特别是单个IP​​地址的连接数．
+使用limit_conn_zone和limit_conn指令．
+
+
+
+
+http { 
+    limit_conn_zone $binary_remote_addr zone=addr：10m; 
+    
+　　#定义一个名为addr(标识，下面 limit_conn 和这一样)的limit_req_zone用来存储session，大小是10M内存，
+    #以$binary_remote_addr 为key,
+    #nginx 1.18以后用limit_conn_zone替换了limit_conn,
+    #且只能放在http{}代码段．
+server { 
+
+        ... 
+
+        location /download/ { 
+            limit_conn addr 1; 　　#连接数限制
+            #设置给定键值的共享内存区域和允许的最大连接数。超出此限制时，服务器将返回503（服务临时不可用）错误.
+　　　　　　#如果区域存储空间不足，服务器将返回503（服务临时不可用）错误
+
+
+        }
+		
+		
+
+ngx_http_limit_req_module：用于限制每一个定义的密钥的请求的处理速率，特别是从一个单一的IP地址的请求的处理速率。
+使用“泄漏桶”方法进行限制．指令：limit_req_zone和limit_req．
+
+
+ngx_http_limit_req_module：限制某一时间内，单一IP的请求数．示例：
+
+http {
+    limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;     #s秒,m分钟
+
+    ...
+　　#定义一个名为one(标识，下面 limit_req 和这一样)的limit_req_zone用来存储session，大小是10M内存，　　
+
+　　#以$binary_remote_addr 为key,限制平均每秒的请求为1个，
+　　#1M能存储16000个状态，rete的值必须为整数，
+    server {
+
+        ...
+
+        location /search/ {
+            limit_req zone=one burst=5;
+　　　　　　　　
+　　　　　　　　#限制每ip每秒不超过1个请求，漏桶数burst为5,也就是队列．
+　　　　　　　　#nodelay，如果不设置该选项，严格使用平均速率限制请求数，超过的请求被延时处理．
+　　　　　　　　#举个栗子：
+　　　　　　　　＃设置rate=20r/s每秒请求数为２０个，漏桶数burst为5个，
+　　　　　　　　#brust的意思就是，如果第1秒、2,3,4秒请求为19个，第5秒的请求为25个是被允许的，可以理解为20+5
+　　　　　　　　#但是如果你第1秒就25个请求，第2秒超过20的请求返回503错误．
+　　　　　　　　＃如果区域存储空间不足，服务器将返回503（服务临时不可用）错误　
+　　　　　　　　＃速率在每秒请求中指定（r/s）。如果需要每秒少于一个请求的速率，则以每分钟的请求（r/m）指定。　　　　　　　　
+
+        }

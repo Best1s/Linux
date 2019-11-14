@@ -2,8 +2,11 @@
 bind 127.0.0.1
 #访问redis服务只能通过本机的客户端连接,如果bind选项为空的话，那会接受所有来自于可用网络接口的连接
 
-rotected-mode yes
+protected-mode yes
 #保护模式，默认是开启状态，只允许本地客户端连接， 可以设置密码或添加bind来连接
+1、关闭protected-mode模式，此时外部网络可以直接访问
+2、开启protected-mode保护模式，需配置bind ip或者设置访问密码
+
 
 prot 6379 
 #监听端口号，默认为6379，如果设为0，redis将不在socket 上监听任何客户端连接

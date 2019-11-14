@@ -1,4 +1,4 @@
-redis 持久化
+一：redis 持久化
 
 1)：快照模式   Snapshotting   （默认）
 触发格式
@@ -14,10 +14,42 @@ appendfsync everysec //每秒钟写入磁盘一次，在性能和持久化方面
 dbfilename          #文件路径
 
 
-redis主从
+二：redis主从  *redis主从和mysql主从不一样，redis主从不用事先同步数据，它会自动同步过去
 
-从服务器配置    slaveof   <ip>  	<port>
+从服务器配置    
+slaveof   <ip>  	<port>
 masterauth 	<密码>
+
+
+三：Redis 哨兵模式 （Redis sentinel）
+Sentinel是一个管理多个Redis实例的工具，它可以实现对Redis的主节点存活检测、主从运行情况检测、自动故障转移（failover）、主从切换。
+Redis的Sentinel最小配置是一主一从
+	监控
+		Sentinel会不断的检查主服务器和从服务器是否正常运行。
+
+	通知
+		当被监控的某个Redis服务器出现问题，Sentinel通过API脚本向管理员或者其他的应用程序发送通知。
+
+	自动故障转移
+		当主节点不能正常工作时，Sentinel会开始一次自动的故障转移操作，
+		它会将与失效主节点是主从关系的其中一个从节点升级为新的主节点， 并且将其他的从节点指向新的主节点。
+
+	配置提供者
+		在Redis Sentinel模式下，客户端应用在初始化时连接的是Sentinel节点集合，从中获取主节点的信息。
+
+
+
+*相关概念
+主观失效
+	SDOWN（subjectively down）,直接翻译的为”主观”失效,即当前sentinel实例认为某个redis服务为”不可用”状态.
+
+客观失效
+	ODOWN（objectively down）,直接翻译为”客观”失效,即多个sentinel实例都认为master处于”SDOWN”状态,
+	那么此时master将处于ODOWN,ODOWN可以简单理解为master已经被集群确定为”不可用”,将会开启failover
+
+
+
+
 
 
 
