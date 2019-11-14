@@ -50,7 +50,7 @@ http {
 　　　　　　　　
 　　　　　　　　#限制每ip每秒不超过1个请求，漏桶数burst为5,也就是队列．
 　　　　　　　　#nodelay，如果不设置该选项，严格使用平均速率限制请求数，超过的请求被延时处理．
-　　　　　　　　#举个栗子：
+　　　　　　　　#例如：
 　　　　　　　　＃设置rate=20r/s每秒请求数为２０个，漏桶数burst为5个，
 　　　　　　　　#brust的意思就是，如果第1秒、2,3,4秒请求为19个，第5秒的请求为25个是被允许的，可以理解为20+5
 　　　　　　　　#但是如果你第1秒就25个请求，第2秒超过20的请求返回503错误．
@@ -58,3 +58,20 @@ http {
 　　　　　　　　＃速率在每秒请求中指定（r/s）。如果需要每秒少于一个请求的速率，则以每分钟的请求（r/m）指定。　　　　　　　　
 
         }
+		
+限制来自单个IP地址的请求的处理速率，同时限制虚拟服务器的请求处理速率：
+http {
+    limit_req_zone $binary_remote_addr zone=perip:10m rate=1r/s;
+    limit_req_zone $server_name zone=perserver:10m rate=10r/s;
+
+    ...
+
+    server {
+
+        ...
+
+            limit_req zone=perip burst=5 nodelay;　　#漏桶数为５个．也就是队列数．nodelay:不启用延迟．
+            limit_req zone=perserver burst=10;　　　　#限制nginx的处理速率为每秒10个
+        }    
+
+nginx文档：http://nginx.org/en/docs/http/ngx_http_limit_req_module.html
