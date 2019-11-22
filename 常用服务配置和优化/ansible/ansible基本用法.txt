@@ -1,3 +1,17 @@
+Chef  		#Ruby语言编写 C/S架构  Recipe脚本编写规范
+Saltstack	#C/S架构,YAML脚本编写规范，适合大规模集群部署
+Ansible		# Playbook脚本编写规范
+
+ansible yum 安装会于现有python项目模块可能产生冲突
+		源码安装 在独立吃python venv中   
+		git地址：https://github.com/ansible/ansible.git
+1：预先安装Python3.6
+2: 安装virtualenv    #pip install virtualenv
+3: 创建ansible账户并安装python3.6版本virtualenv实例
+	#useradd deploy && su - deploy
+	# virtualenv -p /usr/local/bin/python3 .xxx-env
+	#ansible 源码依赖包  cryptography PyYAML jinja2 可用pip安装
+
 #在/etc/ansible/host 下先把组名 客户端配置好
 #ansible密码登录         
 密码需要保存在文件内不安全 
@@ -35,7 +49,7 @@ ansible xxxx -m script -a "/xxx/xx.sh"    -a 指定模块参数
 ansible xxxx -m command -a "free -h"
 
 #shell模块 的功能是执行远程主机上的 shell 脚本文件，支持管道符。
-ansible Client -m shell -a "/home/test.sh"           # 执行远程脚本
+ansible Client -m shell -a "/home/test.sh"           # 执行远程脚本 命令等，支持管道
 
 #script模块
 ansible Client -m script -a "/home/test.sh 12 34"    # 远程执行本地脚本

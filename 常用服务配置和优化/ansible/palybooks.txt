@@ -20,5 +20,13 @@ Templates；
 Handler:
 Roles:
 
-Playboosk基于YAML格式
 
+Playboosk框架与格式
+
+inventory/				##Server详细清单目录
+	testenv				#具体清单与变量声明文件
+roles/					#roles任务列表
+	testbox/			#testbox详细任务
+		tasks/			
+			main.yml	#testbox主任务文件
+deploy.yml				Playbook任务入口文件

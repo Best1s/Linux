@@ -15,10 +15,11 @@ git remote
 git remote add origin  http://github.com/xxxxx
 git remote rm <主机名>
 git fetch <远程主机名>
+
+git tag  #列出现有标签
+git tag -a 标签名 -m "附注信息"  #创建一个含附注类型的标签  -a 改为 -s 签署标签
+
 git status
-
-git tag -a 标签名 -m "附注信息"
-
 <<<<<<< HEAD
 A: 你本地新增的文件（服务器上没有）.
 C: 文件的一个新拷贝.
@@ -34,7 +35,7 @@ commit
 git diff
 git log
 git pull <远程主机名> <远程分支名>:<本地分支名>  #拉取
-git push <远程主机名> <本地分支名>:<远程分支名>  #代码上推	
+git push <远程主机名> <本地分支名>:<远程分支名>  #代码推送 默认	不传标签 git push origin [tagname] --tags推送所有标签	
 git clone http://github.com/xxxxx
 
 #git clone 仓库内单个文件或者目录

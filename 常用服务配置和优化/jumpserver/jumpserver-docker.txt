@@ -1,0 +1,20 @@
+官方文档：https://docs.jumpserver.org/zh/docs/dockerinstall.html
+
+docker run --name myjms -d \
+    -v /opt/jumpserver:/opt/jumpserver/data/media \
+    -p 8080:80 \
+    -p 2222:2222 \
+	--restart=always \
+    -e SECRET_KEY=xxxxxMIX5ntHy5B0z9RYnhfWoG2AFH4qaT0V55FBF \
+    -e BOOTSTRAP_TOKEN=xxxx1S7PakxWek \
+    -e DB_HOST=10.0.xx.x \
+    -e DB_PORT=3306 \
+    -e DB_USER=jumpserver \
+    -e DB_PASSWORD=xxxxoZjf9el \
+    -e DB_NAME=jumpserver \
+    -e REDIS_HOST=10.0.xx.x \
+    -e REDIS_PORT=6379 \
+    -e REDIS_PASSWORD=xxx%A@Tu \
+    jumpserver/jms_all:1.4.8
+	
+	
