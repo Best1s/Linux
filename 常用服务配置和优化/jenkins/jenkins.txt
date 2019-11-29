@@ -39,6 +39,9 @@ https://jenkins.io/zh/doc/book/installing/
 4，	配置Jenkins。ip:8080
 
 
+jenkins yum 安装配置文件 /etc/sysconfig/jenkins
+
+
 
 
 
