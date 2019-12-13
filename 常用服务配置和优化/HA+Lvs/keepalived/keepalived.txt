@@ -1,0 +1,200 @@
+安装  yum install keeplived
+
+keepalived只有一个配置文件keepalived.conf，里面主要包括以下几个配置区域，分别是
+global_defs、         全局定义及故障时默认邮件发送 参数
+static_ipaddress、    设置本节点的IP              如果你的机器上已经配置了IP和路由，那么这两个区域可以不用配置
+static_routes、       设置本节点路由信息       如果你的机器上已经配置了IP和路由，那么这两个区域可以不用配置
+vrrp_script、         用来做健康检查，检查失败时会将vrrp_instance的priority减少相应的值。
+
+vrrp_instance         用来定义对外提供服务的VIP区域及其相关属性
+
+virtual_server        虚拟服务器virtual_server定义块 ，虚拟服务器定义是keepalived框架最重要的项目了，
+					  是keepalived.conf必不可少的部分。 该部分是用来管理LVS的，是实现keepalive和LVS相结合的模块
+
+
+
+global_defs {
+notification_email             发生诸如切换操作时发送email通知邮件地址 可以多个每行一个
+{
+admin@example.com
+}
+	notification_email_from admin@example.com    #发送通知邮件 源地址
+	smtp_server 127.0.0.1                        #smtp服务器地址
+	stmp_connect_timeout 30                      #smtp连接超时时间
+	router_id node1                              #机器标识 主要用于通知中
+    vrrp_skip_check_adv_addr
+    vrrp_strict			#严格执行VRRP协议规范，此模式不支持节点单播会
+						#自动添加如下 iptables 规则：
+						# -A INPUT -m set --match-set keepalived dst -j DROP
+    vrrp_garp_interval 0
+    vrrp_gna_interval 0
+}
+
+注意* 
+	VRRPD配置是Keepalivved的配置的核心，主要来实现高可用，其中VRRPD配置又分为VRRP同步组配置和VRRP实例配置。
+	同步组主要是解决多个不同实例在多个不同网段的问题，当两个不同的实例分别位于不同的网段当中的时候，
+	如果VRRPD只是配置了A网段的检测，当B网段出现故障的时候，VRRPD会认为仍然正常，不会主备切换，
+	如果加入同步组中就会，任何一个出现问题，都会导致Keepalived进行主备切换。
+
+
+vrrp_sync_group G1{
+    group {
+        VI_1
+        VI_2
+        VI_3
+     }
+     notify_backup "/usr/local/bin/vrrp.back arg1 arg2"
+     notify_master "/usr/local/bin/vrrp.mast arg1 arg2"
+     notify_fault "/usr/local/bin/vrrp.fault arg1 arg2"
+     notify_stop  "/usr/local/bin/vrrp.stop arg1 arg2"
+}
+
+vrrp_sync_group G2{
+    group {
+    VI_3
+    VI_4
+  }
+}
+G1同步组包含3个实例，G2同步组包含两个实例。这五个实例在vrrp_instance中定义
+其中notify_backup，notify_master，notify_fault，notify_stop是keepalived的配置中的一个通知机制，也是它的四种状态。
+notify_master：指定当keepalived进入master状态的时候要执行的脚本，可以是一个状态报警脚本，也可以是一个服务管理脚本，脚本准许传入参数。
+notify_backup：指定当keepalived进入backup状态的时候要执行的脚本，可以是一个状态报警脚本，也可以是一个服务管理脚本，脚本准许传入参数。
+notify_fault:指定当keepalived进入fault状态的时候要执行的脚本，可以是一个状态报警脚本，也可以是一个服务管理脚本，脚本准许传入参数。 
+notify_stop:指定当keepalived进入终止状态的时候要执行的脚本
+
+
+
+
+
+
+
+静态地址和路由配置 （正常不用配置）
+#static_ipaddress {
+#     10.210.214.163/24 brd 10.210.214.255 dev ens33                 静态ip配置，这里实际上和系统里面命令配置IP地址和路由一样
+#...}
+#static_routes {
+#     10.0.0.0/8 via 10.210.214.1 dev ens33                                    静态路由配置
+#...}
+#以上分别表示启动/关闭keepalived时在本机执行的如下命令：
+
+# /sbin/ip addr add 10.210.214.163/24 brd 10.210.214.255 dev ens33
+# /sbin/ip route add 10.0.0.0/8 via 10.210.214.1 dev ens33
+# /sbin/ip addr del 10.210.214.163/24 brd 10.210.214.255 dev ens33
+# /sbin/ip route del 10.0.0.0/8 via 10.210.214.1 dev ens33
+注意： 请忽略这两个区域，一般这个区域不需要配置，机器肯定已经配置了IP和路由。
+
+
+vrrp_instance VI_1 {          #定义VRRP热备实例
+    state MASTER              #热备状态，MASTER表示主服务器（注意大小写）
+    interface ens33           #承载VIP地址的物理接口
+    virtual_router_id 51      #虚拟路由器的ID号，每个热备组保持一致。
+    priority 100              #值范围 0-254， MASTER 要比 BACKUP 高，数值越大越优先。
+    advert_int 1              #通告间隔秒数（心跳频率）。
+    authentication {          #认证信息，每个热备组保持一致
+        auth_type PASS        #认证类型
+        auth_pass 1111        #密码字串
+    }
+    virtual_ipaddress {       #指定VIP地址，可以有多个
+    192.168.1.100
+    }
+	track_script {
+	xxxx 
+	}
+}
+
+virtual_server 192.168.202.200 23 {     #VIP地址，要和vrrp_instance模块中的virtual_ipaddress地址一致
+　　　　delay_loop 6   					#健康检查时间间隔 
+　　　　lb_algo rr 　　			#lvs调度算法rr|wrr|lc|wlc|lblc|sh|dh 
+　　　　lb_kind DR    			#负载均衡转发规则NAT|DR|RUN 
+　　　　persistence_timeout 5 		#会话保持时间 
+　　　　protocol TCP    			#使用的协议 
+　　　　persistence_granularity <NETMASK> 	#lvs会话保持粒度 
+　　　　virtualhost <string>    			#检查的web服务器的虚拟主机（host：头） 
+　　　　sorry_server<IPADDR> <port> 		#备用机，所有realserver失效后启用
+
+real_server 192.168.200.5 23 {          #RS的真实IP地址
+            weight 1 					#默认为1,0为失效
+            inhibit_on_failure 			#在服务器健康检查失效时，将其设为0，而不是直接从ipvs中删除 
+            notify_up <string> | <quoted-string> 		#在检测到server up后执行脚本
+            notify_down <string> | <quoted-string> 		#在检测到server down后执行脚本
+		TCP_CHECK {                    		#常用
+					connect_timeout 3 		#连接超时时间
+					nb_get_retry 3 			#重连次数
+					delay_before_retry 3 	#重连间隔时间
+					connect_port 23  		#健康检查的端口的端口
+					bindto <ip>   
+				  }
+
+		HTTP_GET | SSL_GET{          //不常用
+			url{ #检查url，可以指定多个
+				 path /
+				 digest <string> #检查后的摘要信息
+				 status_code 200 #检查的返回状态码
+				}
+			connect_port <port> 
+			bindto <IPADD>
+			connect_timeout 5
+			nb_get_retry 3
+			delay_before_retry 2
+			}
+
+		SMTP_CHECK{                 //不常用
+			host{
+			connect_ip <IP ADDRESS>
+			connect_port <port> 	#默认检查25端口
+			bindto <IP ADDRESS>
+				 }
+			connect_timeout 5
+			retry 3
+			delay_before_retry 2
+			helo_name <string> | <quoted-string> #smtp helo请求命令参数，可选
+			}
+ 
+		MISC_CHECK{                 //不常用
+			misc_path <string> | <quoted-string> #外部脚本路径
+			misc_timeout #脚本执行超时时间
+			misc_dynamic #如设置该项，则退出状态码会用来动态调整服务器的权重，返回0 正常，不修改；返回1，
+
+		　　#检查失败，权重改为0；返回2-255，正常，权重设置为：返回状态码-2
+			}
+		}
+
+vrrp_script xxxx{
+		script "/xxxx/xxx.sh"
+		interval 1
+		fall 2
+}
+
+
+
+默认日志存放在系统日志：/var/log/messages下
+
+自定义keepalived日志文件为：  /var/log/keepalived.log
+# vim /etc/sysconfig/keepalived
+
+将KEEPALIVED_OPTIONS="-D" 修改为：KEEPALIVED_OPTIONS="-D -d -S 0"
+
+
+ # vim /etc/rsyslog.conf
+在/etc/rsyslog.conf 末尾添加  local0.*  /var/log/keepalived.log
+
+重启相关服务
+# systemctl restart rsyslog
+
+# systemctl restart keepalived
+
+查看生成日志
+# tail /var/log/keepalived.log
+
+```
+ed -i   '/KEEPALIVED_OPTIONS=/d' /etc/sysconfig/keepalived
+
+echo  'KEEPALIVED_OPTIONS="-D -d -S 0"' >> /etc/sysconfig/keepalived
+
+echo  "local0.*    /var/log/keepalived.log"  >> /etc/rsyslog.conf
+
+systemctl  restart rsyslog
+
+systemctl  restart keepalived
+
+```
