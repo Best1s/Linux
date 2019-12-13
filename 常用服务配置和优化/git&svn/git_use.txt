@@ -62,4 +62,4 @@ git reset #可以生成新的旧版本 保留后面的版本
 url = http://user:password@xxxx.com/expand/xxxx.git
 
 
-指定目录更新  git --git-dir=/xxxx/.git pull       --git-dir 传入的是.git
+指定目录更新  git --git-dir=/xxxx/.git pull    --work-tree=/xxxx/xxxx   --git-dir 传入的是.git  --work-tree 工作目录

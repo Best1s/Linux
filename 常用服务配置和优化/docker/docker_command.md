@@ -13,6 +13,9 @@
 * docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
 	--name=xxx	#自定义容器名字
 	--restart=always #docker服务重启时，容器会自动启动
+		# --restart no – 容器退出时不要自动重启。这个是默认值
+		# always – 不管退出状态码是什么始终重启容器。
+		#unless-stopped – 不管退出状态码是什么始终重启容器，不过当daemon启动时，如果容器之前已经为停止状态，不要尝试启动它。
 		#1已经启动的容器  docker container update --restart=always 容器名字
 		#2修改配置文件，要先停止容器，配置文件路径为：/var/lib/docker/containers/容器ID
 		#在该目录下找到一个文件 hostconfig.json ，找到该文件中关键字 RestartPolicy
@@ -160,3 +163,9 @@ docker 启动配置文件
 -H unix://var/run/docker.sock
 docker -H "tcp://x.x.x.x" 远程链接
 利用docker环境变量  DOCKER_HOST="tcp://" 可不用输入地址
+
+
+docker live-restore  解除容器对 docker daemon的依赖
+live-restore 添加到 /etc/docker/daemon.json
+KillMode=process  添加到 /usr/lib/systemd/system/docker.service
+

@@ -1,0 +1,18 @@
+#https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html 5.7版本官方文档
+
+结构
+目录					目录内容
+bin				mysqld服务器，客户端和实用程序
+docs			信息格式的MySQL手册
+man				Unix手册页
+include			包含（头）文件
+lib				图书馆
+share			错误消息，字典和用于数据库安装的SQL
+support-files	杂项支持文件
+
+
+配置 my.cnf
+初始化
+```
+/usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --initialize-insecure --basedir=/usr/local/mysql --datadir=/data/mysql/data --user=mysql
+```
