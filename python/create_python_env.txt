@@ -1,7 +1,0 @@
-python -m venv xxxx
-#创建python虚拟环境需要用到 virtualenv
-pip install --user virtualenv
-#多版本python 
-virtualenv xxxx --python=python3
-source xxxx/bin/activate  #激活虚拟环境
-deactivate  #停止虚拟环境
