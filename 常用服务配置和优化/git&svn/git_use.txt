@@ -18,7 +18,7 @@ git fetch <远程主机名>
 
 git tag  #列出现有标签
 git tag -a 标签名 -m "附注信息"  #创建一个含附注类型的标签  -a 改为 -s 签署标签
-
+git push 标签名
 git status
 <<<<<<< HEAD
 A: 你本地新增的文件（服务器上没有）.
@@ -54,7 +54,8 @@ git reset	--hard   需要回滚版本号
 强制提交 git push -f origin master  #本地版本比仓库版本旧 需要强制提交    
 git reset #可以生成新的旧版本 保留后面的版本
 使用“git revert -n 版本号”反做，并使用“git commit -m 版本名”提交：#注意： 这里可能会出现冲突，那么需要手动修改冲突的文件。而且要git add 文件名。
-
+==========================================
+git cherry-pick <commit id>      #稳定版本V2，开发版本V3，只在V2中增加V3个某个功能。
 
 
 
