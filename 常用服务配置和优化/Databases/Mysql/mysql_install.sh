@@ -1,5 +1,6 @@
 #!/bin/bash
 #依赖关系依次为common→libs→client→server https://blog.csdn.net/wudinaniya/article/details/81094578
+##yum 安装https://dev.mysql.com/downloads/repo/yum/
 #rpm 安装 依赖 libaio
 rpm -qa|grep libaio-devel
 if [ $? -eq 0 ];then
@@ -12,5 +13,4 @@ else
 fi
 mysqld --initialize --user=mysql
 chown mysql:mysql -R /var/lib/mysql
-#二进制安装 #https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html 5.7版本官方文档
-#yum 安装https://dev.mysql.com/downloads/repo/yum/
+
