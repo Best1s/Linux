@@ -1,3 +1,5 @@
+https://dev.mysql.com/doc/refman/5.7/en/	#mysql 5.7参考手册
+
 mysqld  --initialize-insecure  #初始化msyql
 ###mysql用户操作
 1. 创建用户       
