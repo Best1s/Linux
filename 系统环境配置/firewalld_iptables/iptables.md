@@ -112,7 +112,6 @@ iptables语法:
 --dport #匹配目的端口
 		--dport 80	#匹配目的端口是80的数据包
 		--dport 22	#匹配目的端口是22的数据包
-
 ```
 
 
@@ -177,7 +176,11 @@ iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE
 
 1. state 按照包状态匹配
 ```
-#有4种状态，这些状态可以一起使用，以便匹配数据包，这可以使我们的防火墙非常强壮和有效，把我们当前系统已经建立的服务放行
+#iptables有四种状态NEW，ESTABLISHED，RELATED，INVALID。这些状态可以一起使用，以便匹配数据包.
+		#NEW状态：在使用UDP、TCP、ICMP等协议时，发出第一个包的状态就是"NEW".主机连接目标主机,第一个要连接的包.
+		#ESTABLISHED状态：主机已与目标主机进行通信，判断标准只要目标主机回应了第一个包，就进入该状态。
+		#RELATED状态：主机已与目标主机进行通信，目标主机发起新的链接方式，例如ftp21 20
+		#INVALID状态：无效的封包，例如数据破损的封包状态
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j accept
 ```
 2. mac 按照来源MAC匹配
