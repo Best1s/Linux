@@ -19,7 +19,7 @@ ipvsadm  -D -t|u|f service-address
 ```
 向集群服务添加real server
 ```
-ipvsadm -a|e -t|u|f service-address -r server-address [options]
+ipvsadm -a|e -t|u|f service-address -r server-address [-g|i|m] [-w weight]
 
 -a, --add-server
 
@@ -30,6 +30,13 @@ Add a real server to a virtual service.(向集群添加一个RS地址)
 Edit a real server in a virtual service.（在集群中编辑一个RS）
 
 -r, --real-server server-address（指定RS，host[:port]这样的格式）
+
+选项：
+	lvs类型： 
+		-g:gateway,dr类型，默认
+		-i:ipip,tun类型
+		-m:masquerade,nat类型
+	-w weight:权重 
 ```
 
 
