@@ -1,15 +1,19 @@
 Centos7以上的发行版自带了firewalld防火墙的。
-###iptables与firewalld
+### iptables与firewalld
 * iptables的防火墙策略是交由内核层面的netfilter网络过滤器来处理，
 * firewalld则是交由内核层面的nftables包过滤框架来处理。 
 * firewalld支持动态更新技术并加入了区域（zone）的概念。
 * firewalld预先准备了几套防火墙策略集合（策略模板），用户可以根据生产场景的不同而选择合适的策略集合，从而实现防火墙策略之间的快速切换。
 
-firewalld 配置文件目录，/usr/lib/firewalld 和 /etc/firewalld，
+firewalld 配置文件目录，/usr/lib/firewalld 和 /etc/firewalld
+
 server 文件夹存储服务数据，就是一组定义好的规则。
+
 zones 存储区域规则
+
 firewalld.conf 默认配置文件，可以设置默认使用的区域，默认区域为 public，对应 zones目录下的 public.xml
-Firewalld网络区域
+
+Firewalld区域
 ```
 区域								描述
 drop（丢失）	任何接收的网络数据包都被丢弃，没有任何回复。仅能有发送出去的网络练连接
@@ -31,7 +35,7 @@ internal (内部)	用于内部网络。您可以基本上信任网络内的其�
 trusted (信任)	可接受所有的网络连接
 
 ```
-###firewall-cmd用法
+### firewall-cmd用法
 
 
 1. 重载防火墙配置
@@ -161,6 +165,7 @@ firewall-cmd --zone=drop --add-rich-rule="rule family="ipv4" source address="192
 firewall-cmd --add-masquerade
 firewall-cmd --zone=public --permanent --add-rich-rule="rule family="ipv4" source address="192.168.0.0/24" forward-port port="80" to-port="8080" protocol="tcp" to-addr="local"   #来自192.168.0.0/24这个段的80端口数据转发到本地的8080端口
 ```
+
 
 防火墙开启内部上网
 1、网卡默认是在public的zones内，也是默认zones。永久添加源地址转换功能
