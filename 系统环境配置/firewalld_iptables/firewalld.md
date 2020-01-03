@@ -94,62 +94,73 @@ firewall-cmd --add-interface=<网卡名称>  #将源自该网卡的所有流量�
 firewall-cmd --change-interface=<网卡名称>   #将某个网卡与区域进行关联
 ```
 
-防火墙富规则策略
+防火墙富规则策略,上面的条目富规则都可实现具体配置案例查询firewalld.richlanguage
 ```
-上面的条目富规则都可实现具体配置案例查询firewalld.richlanguage
-//区里的富规则按先后顺序匹配，按先匹配到的规则生效。#firewall-cmd ↓
---add-rich-rule='<RULE>'    //在指定的区添加一条富规则
---remove-rich-rule='<RULE>' //在指定的区删除一条富规则
---query-rich-rule='<RULE>'  //找到规则返回0 ，找不到返回1
---list-rich-rules       //列出指定区里的所有富规则
---list-all 和 --list-all-zones 也能列出存在的富规则
-//在192.168.0.0/24这个段里可以访问tftp服务
-rule family="ipv4" source address="192.168.0.0/24" service name="tftp" log prefix="tftp" accept
-//来自192.168.0.0/24这个段的8080端口数据转发到本地的80端口
-rule family="ipv4" source address="192.168.0.0/24" forward-port to-addr="local" to-port="8080" protocol="tcp" port="80"
-//拒绝192.168.2.4这个ip访问
-rule family="ipv4" source address="192.168.2.4" drop
+富规则语法:
+rule [family="ipv4|ipv6"|"be"]
+	[source] address="address[/mask]" [invert="True"]
+	[destination] address="address[/mask]" invert="True"
+	service name="service name" |
+	port="port value" protocol="tcp or udp" |
+	protocol value="<protocol>" |
+	icmp-block |
+	masquerade |
+	forward-port port="port value"  to-port="port value" protocol="tcp|udp" to-addr="address"
+	[log] [prefix="prefix text"] [level="log level"] [limit value="rate/duration"]
+	[audit]
+	[accept|reject|drop]
+
+#区里的富规则按先后顺序匹配，按先匹配到的规则生效。
+firewall-cmd --add-rich-rule='<RULE>'    //在指定的区添加一条富规则
+firewall-cmd --remove-rich-rule='<RULE>' //在指定的区删除一条富规则
+firewall-cmd --query-rich-rule='<RULE>'  //找到规则返回0 ，找不到返回1
+firewall-cmd --list-rich-rules       //列出指定区里的所有富规则
+firewall-cmd --list-all 和 --list-all-zones 也能列出存在的富规则
 ```
-8. 允许指定ip的所有流量
+1. 允许指定ip的所有流量
 ```
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="<ip>" accept"
 例：
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="192.168.2.1" accept" # 表示允许来自192.168.2.1的所有流量
 ```
-9. 允许指定ip的指定协议
+2. 允许指定ip的指定协议
 ```
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="<ip>" protocol value="<protocol>" accept"
 例：
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="192.168.2.208" protocol value="icmp" accept" # 允许192.168.2.208主机的icmp协议，即允许192.168.2.208主机ping
 ```
-10. 允许指定ip访问指定服务
+3. 允许指定ip访问指定服务
 ```
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="<ip>" service name="<service name>" accept"
 例：
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="192.168.2.208" service name="ssh" accept" # 允许192.168.2.208主机访问ssh服务
+firewall-cmd --add-rich-rule="rule family="ipv4" source address="192.168.0.0/24" service name="tftp" log prefix="tftp" accept"	#在192.168.0.0/24这个段里可以访问tftp服务,开启log
 ```
-11. 允许指定ip访问指定端口
+4. 允许指定ip访问指定端口
 ```
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="<ip>" port protocol="<port protocol>" port="<port>" accept"
 例：
 firewall-cmd --add-rich-rule="rule family="ipv4" source address="192.168.2.1" port protocol="tcp" port="22" accept" # 允许192.168.2.1主机访问22端口
 ```
-12. 将指定ip改为网段
+5. 将指定ip改为网段
 ```
 8-11 的各个命令都支持 source address 设置为网段，即这个网段的ip都是适配这个规则：
 例如：
 firewall-cmd --zone=drop --add-rich-rule="rule family="ipv4" source address="192.168.2.0/24" port protocol="tcp" port="22" accept"
 表示允许192.168.2.0/24网段的主机访问22端口 。
 ```
-13. 禁止指定ip/网段
+6. 禁止指定ip/网段
 ```
 8-12 各个命令中，将 accept 设置为 reject表示拒绝，设置为 drop表示直接丢弃（会返回timeout连接超时）
 例如：
 firewall-cmd --zone=drop --add-rich-rule="rule family="ipv4" source address="192.168.2.0/24" port protocol="tcp" port="22" reject"
 表示禁止192.168.2.0/24网段的主机访问22端口 。
 ```
-
-
+7. 指定网段转发 
+```
+firewall-cmd --add-masquerade
+firewall-cmd --zone=public --permanent --add-rich-rule="rule family="ipv4" source address="192.168.0.0/24" forward-port port="80" to-port="8080" protocol="tcp" to-addr="local"   #来自192.168.0.0/24这个段的80端口数据转发到本地的8080端口
+```
 
 防火墙开启内部上网
 1、网卡默认是在public的zones内，也是默认zones。永久添加源地址转换功能
