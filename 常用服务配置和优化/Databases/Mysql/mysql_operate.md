@@ -60,12 +60,18 @@ log_timestamps = SYSTEM
 grant replication slave on *.* to 'rep1'@'%' identified by 'mysql';
 
 #my.cnf配置中
-binlog-ignore-db=xxxx  #忽略同步库
+
+binlog-ignore-db=xxxx  #忽略同步的库
 binlog-do-db=xxx  #需要同同步的库不在内不同步
 replicate-wild-do-table=db_name.%  #只复制到那个库的那个表
 replicate-wild-ignore-table=mysql.% #忽略哪个库到那个表
 
+#自增长字段，主主中需要配置，避免两台服务器同时做更新时自增长字段的值之间发生冲突。
+auto_increment_offset = 1
+auto_increment_increment = 2
+
 #slave主从
+
 CHANGE MASTER TO
 MASTER_HOST='1.1.1.1',
 MASTER_PORT=3306,
@@ -73,6 +79,8 @@ MASTER_USER='slave',
 MASTER_PASSWORD='123456',
 MASTER_LOG_FILE='mysql-bin.00001',
 MASTER_LOG_POS=1111;
+
+
 
 状态查看
 show slave status;
@@ -206,8 +214,43 @@ show processlist\G  或 show full processlist;
 
 MySQL防误删插件Recycle_bin
 
+```
+只读，在配置文件/etc/my.cnf中的mysqld中配置
+read_only=1  		#0关闭只读，1开启  super可写
+super_read_only=1	#全账号只读，mysql的root用户都不能写入
+binlog_format = MIXED                  #binlog日志格式，mysql默认采用statement，建议使用mixed
+
+#MIXED说明
+对于执行的SQL语句中包含now()这样的时间函数，会在日志中产生对应的unix_timestamp()*1000的时间字符串，slave在完成同步时，
+取用的是sqlEvent发生的时间来保证数据的准确性。另外对于一些功能性函数slave能完成相应的数据同步，而对于上面指定的一些类似于UDF函数，
+导致Slave无法知晓的情况，则会采用ROW格式存储这些Binlog，以保证产生的Binlog可以供Slave完成数据同步。
+```
+###log 根据需要开启
+常见的MySQL数据库日志有：错误日志（log_error）、慢查询日志（slow_query_log）、二进制日志（bin_log）、通用查询日志（general_log）
+```
+#bin-log
+log-bin = /data/mysql/mysql-bin.log    #binlog日志文件
+expire_logs_days = 7                   #binlog过期清理时间
+max_binlog_size = 100m                 #binlog每个日志文件大小
+binlog_cache_size = 4m                 #binlog缓存大小
+max_binlog_cache_size = 512m           #最大binlog缓存大小
+
+#slow-log
+slow_query_log = 1
+slow_query_log_file = /xxx/xxx.log 	
+long_query_time = 1 
+log_queries_not_using_indexes = 1 #记录所有没有利用索引来进行查询的语句
+
+#错误日志
+log_error = /var/log/mysql/error.log
+
+#通用查询日志
+general_log = 1	#mysql中的所有操作将会记录下来
+general_log_file = /var/log/mysql/mysql.log
+log_output='FILE’ #表示将日志存入文件,默认值是FILE
 
 
+```
 
 
 
