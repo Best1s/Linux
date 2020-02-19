@@ -186,6 +186,25 @@ A, –all-databases —选择所有的库
 myisamchk会自动检查并修复数据表中的索引错误。
 ```
 
+3 表
+表损坏的原因分析
+以下原因是导致mysql 表毁坏的常见原因：
+1、 服务器突然断电导致数据文件损坏。
+2、 强制关机，没有先关闭mysql 服务。
+3、 mysqld 进程在写表时被杀掉。
+4、 使用myisamchk 的同时，mysqld 也在操作表。
+5、 磁盘故障。
+6、 服务器死机。
+7、 mysql 本身的bug 。
+
+
+用 check  table table_name;     检查表 不用重启
+
+修复表
+1、 使用 repair table table_name； 或myisamchk 来修复。
+2、 如果上面的方法修复无效，采用备份恢复表。
+
+
 ###mysql-bin文件清除
 
 ```

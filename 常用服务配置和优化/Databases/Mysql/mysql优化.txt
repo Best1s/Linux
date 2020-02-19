@@ -110,8 +110,36 @@ possible_keys: NULL
         Extra: Using where
 1 row in set, 1 warning (0.00 sec)
 
+从左至右，性能由差到好
 
-https://www.cnblogs.com/sunxun/p/9673788.html
+ALL: 扫描全表
+
+index: 扫描全部索引树
+
+range: 扫描部分索引，索引范围扫描，对索引的扫描开始于某一点，返回匹配值域的行，常见于between、<、>等的查询
+
+ref: 使用非唯一索引或非唯一索引前缀进行的查找
+
+（eq_ref和const的区别：）
+eq_ref：唯一性索引扫描，对于每个索引键，表中只有一条记录与之匹配。常见于主键或唯一索引扫描
+
+const, system: 单表中最多有一个匹配行，查询起来非常迅速，例如根据主键或唯一索引查询。system是const类型的特例，当查询的表只有一行的情况下， 使用system。
+
+NULL: 不用访问表或者索引，直接就能得到结果，如select 1 from test where 1
+
+possible_keys: 表示查询时可能使用的索引。如果是空的，没有相关的索引。这时要提高性能，可通过检验WHERE子句，看是否引用某些字段，或者检查字段不是适合索引
+
+key: 显示MySQL实际决定使用的索引。如果没有索引被选择，是NULL
+
+key_len: 使用到索引字段的长度
+
+注：key_len显示的值为索引字段的最大可能长度，并非实际使用长度，即key_len是根据表定义计算而得，不是通过表内检索出的。
+
+ref: 显示哪个字段或常数与key一起被使用
+
+rows: 这个数表示mysql要遍历多少数据才能找到，表示MySQL根据表统计信息及索引选用情况，估算的找到所需的记录所需要读取的行数，在innodb上可能是不准确的
+
+Extra: 执行情况的说明和描述。包含不适合在其他列中显示但十分重要的额外信息
 
 
 
@@ -122,3 +150,8 @@ mysqldumpslow -s r -t 10 /slowquery.log #slow记录最多的10个语句
 推荐用分析日志工具 – mysqlsla
 
 wget http://hackmysql.com/scripts/mysqlsla-2.03.tar.gz
+
+
+
+
+select count(1)  or select count(*) ?
