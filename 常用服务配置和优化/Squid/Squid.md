@@ -108,5 +108,19 @@ refresh_pattern ^gopher:	1440	0%	1440
 refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
 refresh_pattern .		0	20%	4320
 
-
+#用户认证需要添加
+auth_param basic program /usr/lib/squid/ncsa_auth /etc/squid/passwd
+auth_param basic children 5
+auth_param basic credentialsttl 2 hours
+auth_param basic realm Example.com's Squid proxy-caching
+acl auth_user proxy_auth REQUIRED
+http_access allow auth_user
+#注释：
+#第一行：选择的认证方式为basic，认证程序路径和密码文件路径。
+#第二行：认证程序的进程数
+#第三行：认证有效时间
+#第四行：认证领域内容，上面定义的web浏览需要输入用户密码
+#第五,六行：设置允许认证的用户访问
+#生成密码文件 需要httpd-tools
+#htpasswd -c /etc/squid/passwd auth_user 
 ```
