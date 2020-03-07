@@ -11,11 +11,17 @@ Docker registry
 ```
 yum install -y yum-utils device-mapper-persistent-data  lvm2
 ```
-添加docker源
+添加docker源官方
 ```
 yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
+```
+阿里云
+```
+yum-config-manager \
+	--add-repo \
+	http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 ```
 安装dcoker-ce,并启动
 ```
@@ -23,9 +29,14 @@ yum install docker-ce
 systemctl start docker-ce
 ```
 
-###docker 镜像源加速
+###docker 镜像源加速 /etc/docker/daemon.json文件添加
 ```
-#Docker 官方中国区
+{
+  "registry-mirrors": ["https://5cdpj2vb.mirror.aliyuncs.com"]
+}
+```
+###Docker 官方中国区
+```
 https://registry.docker-cn.com
 #网易
 http://hub-mirror.c.163.com
