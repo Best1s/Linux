@@ -1,0 +1,42 @@
+文档https://help.aliyun.com/document_detail/111738.html?spm=a2c4g.11186623.2.30.3a2a7f67X0cPee#concept-ocb-htw-dhb
+
+扩展分区和文件系统_Linux系统盘，CentOS 确保是 7.2 以上  内核3.6版本以上
+本文的操作步骤适用于以下分区和文件系统格式的云盘：
+
+分区格式支持mbr、gpt   文件系统支持ext*、xfs、btrfs
+
+在线扩容后进入ECS安装 cloud-utils-growpart xfsprogs
+
+yum install cloud-utils-growpart xfsprogs
+
+运行growpart <DeviceName> <PartionNumber>命令调用growpart为需要扩容的云盘和对应的第几个分区扩容
+
+运行resize2fs <PartitionName>命令调用resize2fs扩容文件系统。
+
+查看分区大小
+
+
+*resize2fs
+        调整ext2\ext3\ext4文件系统的大小，它可以放大或者缩小没有挂载的文件系统的大小。
+		如果文件系统已经挂载，它可以扩大文件系统的大小，前提是内核支持在线调整大小。
+语法 resize2fs [选项]  device  [size]
+     resize2fs [ -fFpPM ]  [ -d debug-flags ]  [ -S RAID-stride ]  device  [ size ]
+	 
+-ddebug-flags		打开各种resize2fs调试特性，如果它们已经编译成二进制文件的话。
+					调试标志应该通过从以下列表中添加所需功能的数量来计算：
+					2，调试块重定位。
+					4，调试iNode重定位。
+					8，调试移动inode表。
+
+-f					强制执行，覆盖一些通常强制执行的安全检查。
+
+-F					执行之前，刷新文件系统的缓冲区
+
+-M					将文件系统缩小到最小值
+
+-p					显示已经完成任务的百分比
+
+-P					显示文件系统的最小值
+
+-SRAID-stride		resize2fs程序将启发式地确定在创建文件系统时指定的RAID步长。
+					此选项允许用户显式地指定RAID步长设置，以便由resize2fs代替。

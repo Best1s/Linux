@@ -1,0 +1,45 @@
+I/O调度器为deadline  取代cfq
+XFS 文件系统 500TB 最大8EB
+Ext4  50TB  最大16TB 
+为了提供对配置文件和添加/保存 tuned 配置文件的支持，更新了 Tuna。
+红帽企业版 Linux 7 引入了对 PCP（性能协驾）的支持，PCP 是一套工具、服务及程序库，用于获取、存储及分析系统级的性能测量值。
+Tuna 调试配置细节，如调度器策略、线程优先级以及 CPU 和中断关联。
+内置监控系统命令
+top
+ps
+vmstat
+sar
+tuned  和 tuned-adm
+perf
+turbostat #turbostat 由 kernel-tools 数据包提供。是对 Intel® 64 位处理器中处理器的拓扑、频率、空闲的电源状态统计、温度和用电量的报告
+iostat
+irqbalance
+ss
+numastat
+numad
+SystemTap
+OProfile
+Valgrind
+
+#######
+numactl --hardware
+lscpu
+lstopo
+numastat *
+numactl
+
+#######
+vmstat
+valgrind
+
+配置系统
+虚拟内存参数 /proc/sys/vm/  #一旦决定了能提供最佳性能的值，就可以使用sysctl 指令来进行永久设置。
+文件系统参数 /proc/sys/fs
+内核参数 /proc/sys/kernel/
+
+I/O调度器
+LINUX 7 三种调度器  deadline  cfq  noop
+
+网络
+
+
