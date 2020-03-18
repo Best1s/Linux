@@ -1,0 +1,26 @@
+stages:
+  - pull
+  - test
+  
+pull_project:
+  stage: pull
+  tags: 
+    - test_server
+  script:
+    - source /.pass.txt
+    - cd $project_path/$CI_PROJECT_NAME 
+    - git pull https://$user:$pass@gitlab.ky311.com/${CI_PROJECT_PATH}.git
+    - echo "pull time is $(date +%F-%T)" >> pull.log
+  only:
+    - master
+  variables:
+    passa: xxx
+    
+test:
+  stage: test
+  tags: 
+    - test_server
+  only:
+    - dev
+  script: 
+    - echo 1
