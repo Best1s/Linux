@@ -108,6 +108,10 @@ refresh_pattern ^gopher:	1440	0%	1440
 refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
 refresh_pattern .		0	20%	4320
 
+#高匿设置
+request_header_access Via deny all
+request_header_access X-Forwarded-For deny all
+
 #用户认证需要添加
 auth_param basic program /usr/lib/squid/ncsa_auth /etc/squid/passwd
 auth_param basic children 5
