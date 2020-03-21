@@ -16,6 +16,8 @@ git remote add origin  http://github.com/xxxxx
 git remote rm <主机名>
 git fetch <远程主机名>
 
+git check-ignore -v   xxx   	#检查文件是否匹配ignore规则
+
 git tag  #列出现有标签
 git tag -a 标签名 -m "附注信息"  #创建一个含附注类型的标签  -a 改为 -s 签署标签
 git push 标签名
@@ -60,7 +62,10 @@ git cherry-pick <commit id>      #稳定版本V2，开发版本V3，只在V2中�
 
 
 免密验证！
-url = http://user:password@xxxx.com/expand/xxxx.git
+1. url = http://user:password@xxxx.com/expand/xxxx.git
+2. 配置私钥
+3. 免密码设置  git config --global credential.helper store
+   修改了git密码执行：git config --global user.passwd "your_password"     #会在家目录生成.git-credentials文件
 
 
 指定目录更新  git --git-dir=/xxxx/.git pull    --work-tree=/xxxx/xxxx   --git-dir 传入的是.git  --work-tree 工作目录
