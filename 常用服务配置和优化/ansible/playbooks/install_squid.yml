@@ -1,0 +1,36 @@
+---
+- hosts: all
+  remote_user: root
+  vars:
+    package: squid
+    
+  tasks:
+    - name: install squid
+      yum: name={{package}} state=present
+    - name: copy squid configure file
+      copy: src={{item.src}} dest=/etc/squid/ force=yes
+      with_items:
+        - { src: 'example_squid/dmblock.list' }
+        - { src: 'example_squid/user.pass' }
+        - { src: 'example_squid/squid.conf' }
+      notify:
+        - init squid
+        - start squid
+        - enable squid
+    - name: check firewalld status
+      command: firewall-cmd --list-port 
+        register: firewalld_status
+    - name: open 3128 port in firewalld
+      shell: 'firewall-cmd --list-port | grep -q 3128 || firewall-cmd --add-port 77/tcp --zone=public --permanent  firewall-cmd --reload'
+      when: firewalld_status == 0
+      notify:
+        - reload firewalld
+  handlers:
+    - name: init squid            
+      command: "squid -z"
+    - name: start squid                    
+      service: name=squid state=started
+    - name: enable squid
+      command: "systemctl enable squid"
+    - name: reload firewalld
+      command: firewalld-cmd --reload
