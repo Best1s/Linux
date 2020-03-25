@@ -18,11 +18,12 @@
         - start squid
         - enable squid
     - name: check firewalld status
-      command: firewall-cmd --list-port 
-        register: firewalld_status
+      shell: firewall-cmd --list-port && echo $?
+      register: firewalld_status
+      ignore_errors: True
     - name: open 3128 port in firewalld
-      shell: 'firewall-cmd --list-port | grep -q 3128 || firewall-cmd --add-port 77/tcp --zone=public --permanent  firewall-cmd --reload'
-      when: firewalld_status == 0
+      shell: 'firewall-cmd --list-port | grep -q 3128 || firewall-cmd --add-port 3128/tcp --zone=public --permanent'
+      when: result is succeeded
       notify:
         - reload firewalld
   handlers:
@@ -33,4 +34,4 @@
     - name: enable squid
       command: "systemctl enable squid"
     - name: reload firewalld
-      command: firewalld-cmd --reload
+      command: firewall-cmd --reload
