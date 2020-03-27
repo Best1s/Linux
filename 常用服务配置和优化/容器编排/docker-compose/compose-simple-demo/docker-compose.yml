@@ -1,0 +1,37 @@
+version: "3.3"
+services:
+  mysql-master:
+    image: mysql
+    container_name: cul-mysql-master
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "3333:3306"
+    volumes:
+      - ./master/my.cnf:/etc/mysql/conf.d/my.cnf
+  mysql-slave1:
+    image: mysql
+    container_name: cul-mysql-slave1
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - ./slave1/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./slave1/:/docker-entrypoint-initdb.d/
+    depends_on:
+      - mysql-master
+    links:
+      - mysql-master
+  mysql-slave2:
+    image: mysql
+    container_name: cul-mysql-slave2
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "3322:3306"
+    volumes:
+      - ./slave2/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./slave2/:/docker-entrypoint-initdb.d/
+    depends_on:
+      - mysql-master
+    links:
+      - mysql-master
