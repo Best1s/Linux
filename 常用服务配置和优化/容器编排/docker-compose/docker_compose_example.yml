@@ -1,4 +1,4 @@
-
+#文档 https://docs.docker.com/compose/compose-file/
 Compose和Docker兼容性：
     Compose 文件格式有3个版本,分别为1, 2.x 和 3.x
     目前主流的为 3.x 其支持 docker 1.13.0 及其以上的版本
