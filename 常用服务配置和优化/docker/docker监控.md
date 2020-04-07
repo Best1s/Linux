@@ -33,6 +33,7 @@ scope launch 将以容器方式启动 Weave Scope。
 Prometheus的体系结构及其某些生态系统组件：
 ![Prometheus的体系结构](https://prometheus.io/assets/architecture.png)
 概念：
+	- Exporter一类数据采集组件的总称。它负责从目标处搜集数据，并将其转化为Prometheus支持的格式
 	- node_exporter属于jobs/exporter部分称之为exporter导出器，是Prometheus主要的指标来源。
 	- Prometheus Server是服务核心组件，采集到的监控数据均以metric（指标）形式保存在时序数据库中（TSDB）。
 	- 配置方式包含多种，可以直接在写在yaml文件中，但如果配置较长也可以写入其他文件并启用文件发现(file_sd)功能让其自行侦听配置文件变化
@@ -44,7 +45,7 @@ Prometheus的体系结构及其某些生态系统组件：
  运行流程：
 prometheus根据配置定时去拉取各个节点的数据，默认使用的拉取方式是pull，也可以使用pushgateway提供的push方式获取各个监控节点的数据。将获取到的数据存入TSDB，一款时序型数据库。此时prometheus已经获取到了监控数据，可以使用内置的PromQL进行查询。它的报警功能使用Alertmanager提供，Alertmanager是prometheus的告警管理和发送报警的一个组件。prometheus原生的图标功能过于简单，可将prometheus数据接入grafana，由grafana进行统一管理。
 快速部署：
-  - 运行 node-exporter
+  - 运行 node-exporter 用于采集服务器层面的运行指标，包括机器的loadavg、filesystem、meminfo等基础监控，类似于传统主机监控维度的zabbix-agent  
   ```
 docker run -d -p 9100:9100 \
   -v "/proc:/host/proc" \
