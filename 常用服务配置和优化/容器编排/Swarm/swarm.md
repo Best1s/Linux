@@ -40,7 +40,7 @@ docker stack
     - docker stack deploy -c 文件名.yml 编排服务名    # 通过.yml文件指令部署
     - docker stack ls    # 查看编排服务
     - docker stack rm    
-
+docker stack deploy 不支持的标签
 build
 cgroup_parent
 container_name
