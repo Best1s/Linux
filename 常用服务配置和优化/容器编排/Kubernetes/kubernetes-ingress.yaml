@@ -1,0 +1,18 @@
+#Ingress是授权入站连接到达集群服务的规则集合。可以给Ingress配置提供外部可访问的URL、负载均衡、SSL、基于名称的虚拟主机等。
+#用户通过POST Ingress资源到API server的方式来请求ingress。 Ingress controller负责实现Ingress，通常使用负载平衡器，它还可以配置边界路由和其他前端，这有助于以HA方式处理流量。
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+spec:                                # Ingress spec 中包含配置一个loadbalancer或proxy server
+  rules:                             # 的所有信息。最重要的是，它包含了一个匹配所有入站请求的规
+  - http:                            # 则列表。目前ingress只支持http规则。
+      paths:
+      - path: /testpath              # 每条http规则包含以下信息：一个host配置项（比如 
+                                     # for.bar.com，在这个例子中默认是*），path列表（比 
+                                     # 如：/testpath），每个path都关联一个backend(比如 
+                                     # test:80)。在loadbalancer将流量转发到backend之前，所有的 
+                                     # 入站请求都要先匹配host和path。
+       backend:                        
+          serviceName: test          # backend是一个service:port的组合。Ingress的流量被转发到                        
+          servicePort: 80            #  它所匹配的backend
