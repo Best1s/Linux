@@ -24,17 +24,6 @@ kubectl rollout history xxxx
 kubectl rollout undo xxxx --to-version=x
 ```
 kuberbetes中文文档 （http://docs.kubernetes.org.cn/）
-官方安装文档（https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/）
-
-使用Minikube部署Kubernetes集群 单机部署
-首先下载kubectl
-```
-curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.4/bin/linux/amd64/kubectl
-chmod +x kubectl
-```
-安装minikube (https://kubernetes.io/docs/tasks/tools/install-minikube/#before-you-begin)
-线上minikube (https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster-interactive/)
-
 
 
 ####核心概念
