@@ -8,7 +8,7 @@ API SERVER有三种认证方式：基本认证、CA认证、HTTP Base 或Token�
 （2）为kube-apiserver进程配置证书相关的启动参数，包括CA证书（用于验证客户端证书的签名真伪），自己的经过CA签名后的证书及私钥
 
 （3）为每个访问Kubernetes API Server的客户端（如kube-controller-manager,kube-scheduler,kubelet,kube-proxy及调用API Server的客户端程序kubectl等）进程生成自己的数字证书，也都用CA证书进行签名，在相关程序的启动参数里增加CA证书，自己的证书等相关参数
-
+####基于CA认证配置
 **1) 设置kube-apiserver的CA证书相关的文件和启动参数**
 
 使用OpenSSL工具在Master服务器上创建CA证书和私钥相关的文件
@@ -153,7 +153,7 @@ current-context: my-context
 ```
 重启kubelet
 
-5) 设置kube-proxy的启动参数
+**5) 设置kube-proxy的启动参数**
 
 kube-procy 复用上一步kubelet创建的客户端证书，配置启动参数
 ```
@@ -169,9 +169,66 @@ kube-procy 复用上一步kubelet创建的客户端证书，配置启动参数
 --client-certificate:     #使用kube-controller-manager生成cs_client.crt文件。
 --client-key:             #使用为kube-controller-manager生成cs_client.key文件
 ```
-同时，指定apiserver的URL的地址为HTTPS安全地址（如:https://kubernetes-master:6443),最后输入需要执行的子命令，即可对apiserver进行安全访问：
+同时，指定apiserver的URL的地址为HTTPS安全地址（如 https://kubernetes-master:6443) 最后输入需要执行的子命令，即可对apiserver进行安全访问：
 ```
 kubectl --server=https://master-ip:6443 --certificate-authority=/xxxx/ca.crt --client-certificate=/xxxx/cs_client.crt --client-key=/xxxx/cs_client.key get node
 NAME           STATUS    AGE
 192.168.59.136   Ready     3m
+```
+####基于HTTP BASE或TOKEN的简单认证方式
+
+除了基于CA的双向数字证书认证方式，Kubernetes也提供了基于HTTP BASE或TOKEN的简单认证方式，各组件与apiserver之间的通信方式仍采用HTTPS，但不使用CA数字证书
+
+采用基于HTTP BASE或TOKEN的简单认证方式时，API Server 对外暴露HTTPS端口，客户端提供用户名，密码或Toker来完成认证过程。
+**kubectl 命令行工具比较特殊，它同时支持CA双向认证与简单认证两种模式与apiserver通信，其他客户端组件只能配置为双向安全认证或非安全模式与apiserver通信。*
+
+####基于HTTP BASE 认证的配置过程如下。
+1）创建包括用户名，密码和UID的文件basic_auth_file,放置在合适的目录中。**需要注意的是这是一个纯文本文件，用户名，密码都是明文。*
+```
+vi /etc/kubernetes/basic_auth_file
+
+admin,admin,1
+system,system,2
+```
+2)设置kube-apiserver 的启动参数 “--basic_auth_file”,使用上述文件提供安全认证：
+```
+--secure-port=443
+--basic_auth_file=/etc/kubernetes/basic_auth_file
+```
+然后重启API Server服务
+
+3)使用kubectl通过指定的用户名和密码来访问API Server:
+```
+kubectl --server=https://MASTER的IP:6443 --username=admin --password=admin --insecure-skip-tls-verify=true get nodes
+```
+
+####基于TOKEN认证的配置过程如下
+
+1）创建包括用户名，密码和UID的文件token_autha-file,放置在合适的目录中。**注意这是一个纯文本文件，用户名，密码都是明文。*
+```
+cat /etc/kubernetes/tocken_auth_file
+admin,admin,1
+system,system,2
+```
+2)设置kube-apiserver的启动参数"--token_auth_file",使用上述文件提供安全认证：
+```
+--secure-port=443
+ 
+--token_auth_file=/etc/kubernetes/token_auth_file
+```
+然后，重启API Server服务。
+
+3）用curl验证和访问API Server
+```
+[root@kubernetes ~]# curl -k --header "Authorization:Bearer admin" https://master的IP:6443/version
+{
+  "major": "1",
+  "minor": "3",
+  "gitVersion": "v1.3.0",
+  "gitCommit": "283137936a498aed572ee22af6774b6fb6e9fd94",
+  "gitTreeState": "clean",
+  "buildDate": "2016-07-01T19:19:19Z",
+  "goVersion": "go1.6.2",
+  "compiler": "gc",
+  "platform": "linux/amd64"
 ```

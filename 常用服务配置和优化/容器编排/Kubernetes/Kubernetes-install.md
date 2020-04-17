@@ -24,7 +24,7 @@ yum-config-manager \
 ```
 安装kubeadm和相关工具并启动
 ```
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubelet kubeadm  --disableexcludes=kubernetes
 systemctl enable kubelet && systemctl start kubelet
 ```
 配置docker国内镜像源,配置docker Cgroup
@@ -54,7 +54,7 @@ kubeadm token list	#显示token
 ```
 安装node节点
 ```
-yum install -y kubelet  kubectl --disableexcludes=kubernetes
+yum install -y kubelet  kubectl kubeadm --disableexcludes=kubernetes
 systemctl enable kubelet && systemctl start kubelet
 ```
 加入集群

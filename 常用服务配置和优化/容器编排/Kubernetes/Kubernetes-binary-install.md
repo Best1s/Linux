@@ -231,3 +231,13 @@ docker
 kubelet:
 --cgroup-driver=systemd or --cgroup-driver=cgroupfs
 ```
+
+未完成的配置
+kubernetes集群的网络配置
+Flanel、Werave、Calico、Open vSwitch 等跨主机的网络互通配置
+
+内网中无法访问外网的 可以创建 私有的Docker Registry(docker hub)
+
+kubelet配置
+Kubernetes 中是以Pod而不是以Docker容器为管理单位，在Kubelet 创建Pod时，还要启动一个名为k8s.gcr.io/pause:x.x的镜像来实现Pod概念
+node节点拉取镜像后 kubelet 服务启动加上 --pod-infra-container-image=xxx/pause:x.x 然后重启服务，这样每一个Pod启动的时候都会启动一个这样的容器,如果本地没有，kubelet会连接外网下载镜像
