@@ -6,16 +6,15 @@ ConfigMap的典型用法如下
 
 ConfigMap 以一个或多个 key：value 的形式保存在 Kubernetes 中，既可以用变量，也可以用于表示一个完整的配置文件。
 
-####创建 ConfigMap 资源对象
+#### 创建 ConfigMap 资源对象
 1. 通过 YAML 配置文件方式创建
-cat cm-appvars.yaml
 ```
-   apiVersion: v1
-   kind: ConfigMap
-   metadata:
-     name: cm-appvars
-   data:
-     applogleve1: info
-     appdatadir: /var/data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-appvars
+data:
+  applogleve1: info
+  appdatadir: /var/data
 ```
-2. b
+2. 
