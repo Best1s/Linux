@@ -31,8 +31,8 @@ spec:
       emptyDir: {}
 ```
 
-# 查看busybox的日志
+#### 查看busybox的日志
 kubectl logs volume-pod -c busybox
-# 查看tomcat的日志
+#### 查看tomcat的日志
 kubectl exec -it volume-pod -c tomcat -- ls -l /usr/local/tomcat/logs
 kubectl exec -it volume-pod -c tomcat -- tail -200f /usr/local/tomcat/logs/catalina.2020-04-17.log
