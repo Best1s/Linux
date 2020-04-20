@@ -1,0 +1,31 @@
+apiVersion: v1      #
+kind: Service
+matadata:                                #元数据
+  name: string                           #service的名称
+  namespace: string                      #命名空间  
+  labels:                                #自定义标签属性列表
+    - name: string
+  annotations:                           #自定义注解属性列表  
+    - name: string
+spec:                                    #详细描述
+  selector: []                           #label selector配置，将选择具有label标签的Pod作为管理                                          
+  type: string                           #service的类型，指定service的访问方式，默认为 clusterIp     1, clusterIp  2, NodePort 3, loadBalancer                                 
+  clusterIP: string                      # 虚拟服务地址   ,当 type=clusterIP 时，如果不指定，则自动分配。   
+  sessionAffinity: string                #是否支持session ，将同一个客户端(根据客户端的IP地址决定)转发到同一个后端Pod
+  ports:                                 #service需要暴露的端口列表
+  - name: string                         #端口名称
+    protocol: string                     #端口协议，支持TCP和UDP，默认TCP
+    port: int                            #服务监听的端口号
+    targetPort: int                      #需要转发到后端Pod的端口号
+    nodePort: int                        #当type = NodePort时，指定映射到物理机的端口号
+  status:                                #当spce.type=LoadBalancer时，设置外部负载均衡器的地址，用于公有云环境。
+    loadBalancer:                        #外部负载均衡器    
+      ingress:                           #外部负载均衡器 
+        ip: string                       #外部负载均衡器的Ip地址值
+        hostname: string                 #外部负载均衡器的主机名
+
+
+#kubernetes提供了两种负载分发策略：RoundRobin和SessionAffinity
+#RoundRobin：轮询模式，即轮询将请求转发到后端的各个Pod上
+#SessionAffinity：基于客户端IP地址进行会话保持的模式，第一次客户端访问后端某个Pod，之后的请求都转发到这个Pod上
+#默认是RoundRobin模式
