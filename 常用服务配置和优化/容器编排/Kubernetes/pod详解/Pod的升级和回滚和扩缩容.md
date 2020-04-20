@@ -89,13 +89,13 @@ spec:
   minReplicas: 1
   maxReplicas: 10
   metrics:
-  - type: Resource		#基于资源的指标
+  - type: Resource		#基于资源的指标 需要启动 Metrics Server
     resource:
       name: cpu
       target:
         type: AverageUtilization
         averageUtilization: 50
-  - type: Pods		#基于Pod的指标
+  - type: Pods		#基于Pod的指标，系统将对全部 Pod 副本的指标值进行平均值计算 
     pods:
       metric:
         name: packets-per-second
@@ -111,5 +111,14 @@ spec:
       target:
         kind: Value
         value: 10k
+  - type: External		#基于Kubernetes以外的度量指标伸缩
+    external:
+      metric:
+        name: queue_messages_ready
+        selector: "queue=worker_tasks"
+      target:
+        type: AverageValue
+        averageValue: 30
 ```
 
+基于自定义指标的 HPA （基于 Prometheus 的 HPA）
