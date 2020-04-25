@@ -68,5 +68,12 @@ Headless Service
 
 ### 服务发现
 Kubernetes 支持2种基本的服务发现模式 —— 环境变量和 DNS。
+环境变量：当创建一个Pod的时候，kubelet会在该Pod中注入集群内所有Service的相关环境变量。**注意的是，要想一个Pod中注入某个Service的环境变量，则必须Service要先比该Pod创建。*
 
-集群外访问 Pod 或 Service 1.设置容器级别的 hostPort，2.设置 Pod 级别的 hostNetwork=true ,该 Pod 所有容器的端口号直接映射到物理机。3. 设置 nodePort 同时设置 Service 的类型为 NodePort。 4，云 同过 LoadBalancer 映射到服务商提供的 LoadBalancer.
+DNS：可以通过cluster add-on的方式轻松的创建KubeDNS来对集群内的Service进行服务发现。
+
+集群外访问 Pod 或 Service 
+1. 设置容器级别的 hostPort，
+2. 设置 Pod 级别的 hostNetwork=true ,该 Pod 所有容器的端口号直接映射到物理机。
+3. 设置 nodePort 同时设置 Service 的类型为 NodePort。 
+4. 云 同过 LoadBalancer 映射到服务商提供的 LoadBalancer.
