@@ -101,3 +101,7 @@ kubectl run nginx-deployment --image=nginx:1.7.9 --replicas=2
 
 Kubernets 还提供了几个类似的命令，例如 kubectl create、kubectl replace、kubectl edit 和 kubectl patch。
 通常kubectl apply 命令已经能够应对超过 90% 的场景
+
+Swarm 向 Kubernetes 迁移  Kompose工具  Swarm 转换成 kubernetes yaml文件
+
+Derrick 容器迁移工具，代码探测， 5中语言(PHP,GO,JAVA,NODE,PYTHON) 30款框架 Dockerfile/Docker Compose/k8s resource yaml/CI/CD pipeline as code config
