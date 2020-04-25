@@ -119,4 +119,22 @@ dockerfile 构建步骤中，可以使用中间层镜像排查错误
 查看镜像构建过程
 	- docker history [image]
 	
-	
+
+
+FROM
+MAINTAINER
+RUN
+LABEL
+EXPOSE
+ENV
+ADD
+COPY
+ENTRYPOINT
+CMD
+SHELL
+VOLUME
+USER
+WORKDIR
+ONBUILD
+STOPSIGNAL
+HEALTHCHECK
