@@ -11,37 +11,38 @@ export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 3，	下载Jenkins。https://jenkins.io/zh/doc/pipeline/tour/getting-started/	#download  Generic Java package(.war)
 
 启动方式
-1）
-#把war包放入tomcat的webapps 目录 执行tomcat/bin/startup.sh  可以同时监控下logs/catalina.out
+1）把war包放入tomcat的webapps 目录 执行tomcat/bin/startup.sh  可以同时监控下logs/catalina.out
 
-2）
-#不用tomcat  直接启动  java -jar jenkins.war --httpPort=8080
+2）不用tomcat  直接启动  java -jar jenkins.war --httpPort=8080
 
-3）docker启动
+#### docker启动
 docker 中运行
-
-docker pull jenkins/jenkins
+```
 docker run \
-  -u root \
-  --rm \  
-  -d \ 
-  -p 8080:8080 \ 
-  -p 50000:50000 \ 
-  -v jenkins-data:/var/jenkins_home \ 
-  -v /var/run/docker.sock:/var/run/docker.sock \ 
-  jenkinsci/blueocean 
+-u root \
+-itd \
+-p 80:8080 \
+-p 50000:50000 \
+-v /var/jenkins_home/:/var/jenkins_home \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--name jenkins-master \
+--restart=always \
+jenkinsci/blueocean
+```
 
 
 https://jenkins.io/zh/doc/book/installing/
 
 
 
-4，	配置Jenkins。ip:8080
+配置Jenkins。访问ip:80
 
 
 jenkins yum 安装配置文件 /etc/sysconfig/jenkins
 
 
+
+jenkins 语言控制插件 Locale plugin  Localization
 
 
 
