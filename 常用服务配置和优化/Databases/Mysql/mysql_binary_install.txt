@@ -16,3 +16,5 @@ support-files	杂项支持文件
 ```
 /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --initialize-insecure --basedir=/usr/local/mysql --datadir=/data/mysql/data --user=mysql
 ```
+show binary logs;
+purge binary logs to 'mysql-bin.000100';  #删除列于指定日志之前的所有日志，但不包括指定的日志
