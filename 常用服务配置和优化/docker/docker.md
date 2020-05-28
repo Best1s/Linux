@@ -1,11 +1,11 @@
-###docker基本组成
+### docker基本组成
 Docker client
 Docker daemon
 Docker image
 Docker container
 Docker registry
 原则上一个镜像一个服务
-###安装 Docker Engine-Community
+### 安装 Docker Engine-Community
 官方文档：https://docs.docker.com/install/linux/docker-ce/centos/
 安装所需的软件包。
 ```
@@ -29,13 +29,18 @@ yum install docker-ce
 systemctl start docker-ce
 ```
 
-###docker 镜像源加速 /etc/docker/daemon.json文件添加
+### docker 镜像源加速 /etc/docker/daemon.json文件添加
 ```
 {
-  "registry-mirrors": ["https://5cdpj2vb.mirror.aliyuncs.com"]
+    "registry-mirrors" : [
+    "https://registry.docker-cn.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "http://hub-mirror.c.163.com",
+    "https://cr.console.aliyun.com/"
+  ]
 }
 ```
-###Docker 官方中国区
+### Docker 官方中国区
 ```
 https://registry.docker-cn.com
 #网易
