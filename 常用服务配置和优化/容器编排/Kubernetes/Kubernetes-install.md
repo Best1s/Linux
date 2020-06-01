@@ -42,8 +42,10 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.2 k8s.gcr
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.7 k8s.gcr.io/coredns:1.6.7
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.3-0 k8s.gcr.io/etcd:3.4.3-0
 
+或者 提前下载好 kubeadm config images list 中的镜像
+
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-kubeadm init
+kubeadm init --pod-network-cidr 10.244.0.0/16   #指定 pod网络用语 flannel 网络设置
 
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
