@@ -15,7 +15,7 @@ logrotate [OPTION...] <configfile>
 -v, --verbose ：显示转储过程。
 ```
 Logrotate是基于cron来运行的，其脚本是/etc/cron.daily/logrotate
-**如果想指定时间分割日志，可以把logrotate脚本单独配置个时间，或者修改/etc/anacron文件*
+**如果想指定时间分割日志，可以把logrotate脚本单独配置个时间，或者修改 /etc/anacron文件中的START_HOURS_RANGE=3-22*
 
 cat /etc/cron.daily/logrotate
 ``` 
