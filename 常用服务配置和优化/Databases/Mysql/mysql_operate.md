@@ -271,5 +271,15 @@ log_output='FILE’ #表示将日志存入文件,默认值是FILE
 
 ```
 
+Mysql 设置隔离级别，以及事物隔离有几种级别。
+1）read uncommitted : 读取尚未提交的数据 ：就是脏读
+2）read committed：读取已经提交的数据 ：可以解决脏读
+3）repeatable read：重读读取：可以解决脏读 和 不可重复读 ---mysql默认的
+4）serializable：串行化：可以解决 脏读 不可重复读 和 虚读---相当于锁表
+查看设置：SELECT @@tx_isolation;
+修改事务权限的语句是：set [ global | session ] transaction isolation level Read uncommitted | Read committed | Repeatable | Serializable;
 
+如果选择global，意思是此语句将应用于之后的所有session，而当前已经存在的session不受影响。
+如果选择session，意思是此语句将应用于当前session内之后的所有事务。
+如果什么都不写，意思是此语句将应用于当前session内的下一个还未开始的事务。
 
