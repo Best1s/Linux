@@ -59,6 +59,7 @@ log_timestamps = SYSTEM
 #创建个主从用户
 grant replication slave on *.* to 'rep1'@'%' identified by 'mysql';
 
+GRANT SElECT ON *.* TO 'username'@'%' IDENTIFIED BY "password";
 #my.cnf配置中
 
 binlog-ignore-db=xxxx  #忽略同步的库
