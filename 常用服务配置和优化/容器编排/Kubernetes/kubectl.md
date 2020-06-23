@@ -1,3 +1,9 @@
+kubectl 安装 https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/
+启用 shell 自动补全功能
+yum install bash-completion -y
+行 source <(kubectl completion bash) 命令在您目前正在运行的 shell 中开启 kubectl 自动补全功能。
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+
 kubectl命令行的语法如下：
 ```
 kubectl [command] [TYPE] [NAME] [flags]
