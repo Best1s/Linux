@@ -7,3 +7,5 @@ cd  /usr/bin/
 ln  -s  /usr/local/python/bin/pip3  pip3
 ln  -s  /usr/local/python/bin/python3.6  python3.6
 python3.6  --version
+
+##pip3 install xxx -i https://pypi.doubanio.com/simple
