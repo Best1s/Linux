@@ -1,0 +1,9 @@
+默认情况下，Python的stdout和stderr是缓冲的。正如其他响应者所指出的那样，如果您的日志文件为空，那么（假设您的日志记录正确）输出尚未刷新。
+
+该脚本的链接不再有效，但您可以尝试以python3 -u filename.py或等效的PYTHONUNBUFFERED=x python3 filename.py运行您的脚本。这会导致stdout和stderr流无缓冲。
+
+一个完整的示例，它使用标准库的http.server模块来提供当前目录中的文件：
+
+PYTHONUNBUFFERED=x python3 -m http.server &> http.server.log & echo $! > http.server.pid
+
+所有输出（stdout和stderr）都被重定向到http.server.log，它可以被设置为尾，并且服务器的进程ID被写入http.server.pid，以便您可以通过kill $(cat http.server.pid)终止进程。
