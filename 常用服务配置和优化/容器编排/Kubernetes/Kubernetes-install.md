@@ -26,6 +26,7 @@ yum-config-manager \
 ```
 yum install -y kubelet kubeadm  --disableexcludes=kubernetes
 systemctl enable kubelet && systemctl start kubelet
+* 指定版本安装   kubelet-x.xx.x
 ```
 配置docker国内镜像源,配置docker Cgroup
 ```
