@@ -9,3 +9,7 @@ kubectl get pods PODNAME -n NAMESPACE -o yaml | kubectl replace --force -f -
 kubectl get deployment -n NAMESPACE
 kubectl delete deployment DEPLOYNAME -n NAMESPACE
 ```
+加入 master 集群
+```
+kubeadm token create --print-join-command
+```
