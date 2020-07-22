@@ -13,3 +13,8 @@ kubectl delete deployment DEPLOYNAME -n NAMESPACE
 ```
 kubeadm token create --print-join-command
 ```
+
+service-cluster 地址范围配置
+```
+kube-apiserver 启动参数中加入 service-cluster-ip-range= x.x.x.x/x
+```
