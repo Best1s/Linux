@@ -1,3 +1,4 @@
+中文文档 https://rancher2.docs.rancher.cn/docs/installation/requirements/_index
 ###单节点部署
 	docker run -d --restart=unless-stopped -p 8080:8080 rancher/server
 ### 复杂物理环境，进行大规模生产时需要集群部署
