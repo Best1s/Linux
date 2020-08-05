@@ -94,3 +94,15 @@ NGINXACCESS1 %{IP:clientip} - (%{USERNAME:user}|-) \[%{HTTPDATE:timestamp}\] \"%
 # input source log is filebeat
 NGINXACCESS %{IP:clientip} - (%{USERNAME:user}|-) \[%{HTTPDATE:timestamp}\] \"%{NOTSPACE:request} (%{URIPATH1:uri}|-|) HTTP/%{NUMBER:httpversion}\" %{NUMBER:status:int} %{NUMBER:body_sent:int} \"(?:%{GREEDYDATA:http_referrer}|-)\" \"%{GREEDYDATA:agent}\"
 
+
+#tips 多java环境，指定 logstash 使用 java 版本
+
+1、bin/logstash 新增
+
+        JAVA_CMD=/home/admin/soft/jdk1.8.0_121/bin
+
+        JAVA_HOME=/home/admin/soft/jdk1.8.0_121
+
+2、bin/logstash.lib.sh 新增
+
+        JAVA_HOME=/home/admin/soft/jdk1.8.0_121
