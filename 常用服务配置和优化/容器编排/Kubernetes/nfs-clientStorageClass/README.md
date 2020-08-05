@@ -23,10 +23,8 @@ helm init --client-only #将 Helm 配置为 Client-only
 helm 安装 nfs-client-provisioner
 clone  https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner
 ```
-helm install --name my-release --namespace xxxx --set nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-client-provisioner
+helm install --name my-release --namespace xxxx --set storageClass.name=xxx-storage nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-client-provisioner
 ```
-
-
 
 
 ReadWriteOnce(RWO): 可读可写，只支持被单个Pod挂载。
