@@ -23,8 +23,9 @@ host_key_checking = False
 
 #ansible免密登录
 配置免密登录
-ssh-kengen -t rsa
+ssh-keygen -t rsa
 ssh-copy-id 需要免登录的IP
+或者 ansible all -m authorized_key -a "user=root state=present key=\"{{ lookup('file', '/root/.ssh/id_rsa.pub') }} \"" -k  
 
 #
 #ansible基本用法
