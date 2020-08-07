@@ -1,9 +1,19 @@
+#ansible 权威指南 http://www.ansible.com.cn/docs/intro_installation.html
+
 Chef  		#Ruby语言编写 C/S架构  Recipe脚本编写规范
 Saltstack	#C/S架构,YAML脚本编写规范，适合大规模集群部署
 Ansible		# Playbook脚本编写规范
 
 ansible yum 安装会于现有python项目模块可能产生冲突
-		源码安装 在独立吃python venv中   
+```
+RHEL/CentOS 6:
+   # yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+RHEL/CentOS 7:
+   # yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RHEL/CentOS 8:
+   # yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+```
+		源码安装 在独立 python venv中   
 		git地址：https://github.com/ansible/ansible.git
 1：预先安装Python3.6
 2: 安装virtualenv    #pip install virtualenv
