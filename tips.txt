@@ -94,3 +94,19 @@ for i in 路径 ;do echo $i;find $i |wc -l;done
 磁盘读写进程监控
 pidstat -d 1
 
+crontab 加锁
+*/3 * * * * flock -xn /home/xxx.lock -c 'sh /home/xxx.sh > /dev/null 2>&1' > /dev/null 2>&1
+```
+使用flock加锁，flock的一些参数：
+-s,--shared：获取一个共享锁，在定向为某文件的FD上设置共享锁而未释放锁的时间内，其他进程试图在定向为此文件的FD上设置独占锁的请求失败，而其他进程试图在定向为此文件的FD上设置共享锁的请求会成功。
+-x，-e，--exclusive：获取一个排它锁，或者称为写入锁，为默认项。
+-u，--unlock：手动释放锁，一般情况不必须，当FD关闭时，系统会自动解锁，此参数用于脚本命令一部分需要异步执行，一部分可以同步执行的情况。
+-n，--nb, --nonblock：非阻塞模式，当获取锁失败时，返回1而不是等待。
+-w, --wait, --timeout seconds：设置阻塞超时，当超过设置的秒数时，退出阻塞模式，返回1，并继续执行后面的语句。
+-o, --close：表示当执行command前关闭设置锁的FD，以使command的子进程不保持锁。
+-c, --command command：在shell中执行其后的语句。
+
+ -xn：
+
+文件锁使用独占锁，如果锁定则失败不等待。这样当任务未执行完成，下一任务判断到test.lock被锁定，则结束当前的任务，下一周期再判断。参数为-xn
+```
