@@ -1,0 +1,20 @@
+{
+  "selinux-enabled": false,
+  "max-concurrent-downloads": 10,
+  "live-restore": true,
+  "ip-masq": false,
+  "iptables": false,
+  "log-driver": "json-file",
+  "log-level": "warn",
+  "log-opts": {
+    "max-file": "10",
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ],
+  "registry-mirrors":["http://hub-mirror.c.163.com"],
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "insecure-registries": ["x.x.x.x"]
+}
