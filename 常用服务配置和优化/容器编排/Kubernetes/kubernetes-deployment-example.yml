@@ -7,10 +7,11 @@ metadata:
     app: xxx              #标签
 spec:
   replicas: 3   #指明副本数量
-  strategy:
-    rollingUpdate:  #由于replicas为3,则整个升级,pod个数在2-4个之间
-      maxSurge: 1      #滚动升级时会先启动1个pod
-      maxUnavailable: 1 #滚动升级时允许的最大Unavailable的pod个数
+  minReadySeconds: 5   #Kubernetes在等待设置的时间后才进行升级,如果没有设置该值，Kubernetes会假设该容器启动起来后就提供服务了
+  strategy: #升级策略（默认为滚动升级，不需要修改）
+    type: RollingUpdate  #由于replicas为3,则整个升级,pod个数在2-4个之间
+      maxSurge: 1      #滚动升级时会先启动1个pod,升级过程中最多可以比原先设置多出的POD数量
+      maxUnavailable: 1 #滚动升级时允许的最大Unavailable的pod个数,升级过程中最多有多少个POD处于无法提供服务的状态
   template:         #定义 Pod 的模板，这是配置文件的重要部分
     metadata:       #定义 Pod 的元数据，至少要定义一个 labels。labels 的 key 和 value 可以任意指定。
       labels:
