@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1   #接口版本
 kind: Deployment                 #创建的资源类型
 metadata:
   name: xxx               #Deployment名称
-  namespace: cango-prd           #命名空间
+  namespace: xxx           #命名空间
   labels:
     app: xxx              #标签
 spec:
@@ -29,7 +29,8 @@ spec:
     #如果command没写，但args写了，那么Docker默认配置的ENTRYPOINT的命令行会被执行，但是调用的参数是.yaml中的args。
     #如果如果command和args都写了，那么Docker默认的配置被忽略，使用.yaml的配置。
           imagePullPolicy: IfNotPresent  #如果不存在则拉取
-          livenessProbe:       #表示container是否处于live状态。如果LivenessProbe失败，LivenessProbe将会通知kubelet对应的container不健康了。随后kubelet将kill掉container，并根据RestarPolicy进行进一步的操作。默认情况下LivenessProbe在第一次检测之前初始化值为Success，如果container没有提供LivenessProbe，则也认为是Success；
+          livenessProbe:       #表示container是否处于live状态。如果LivenessProbe失败，LivenessProbe将会通知kubelet对应的container不健康了。随后kubelet将kill掉container，
+                               #并根据RestarPolicy进行进一步的操作。默认情况下LivenessProbe在第一次检测之前初始化值为Success，如果container没有提供LivenessProbe，则也认为是Success；
             httpGet:
               path: string  #如果没有心跳检测接口就为/
               port: 8080
@@ -62,9 +63,27 @@ spec:
                 configMapKeyRef:
                   name: special-config   #configmap中找到name为special-config
                   key: special.type      #找到name为special-config里data下的key
+            - name: xxxxx
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP    #metadata.name  metadata.namespace  metadata.labels metadata.annotations  spec.nodeName spec.serviceAccountName status.hostIP status.podIP status.podIPs
           ports:
             - name: http
               containerPort: 8080 #对service暴露端口
+          lifecycle:
+            postStart:   # 容器创建后立即执行
+              exec:   # 除 exec 还有 HttpGet 配置方式 Host、Path、Port
+                command:
+                - bash
+                - -c
+                - 'echo "postStart info" > /tmp/message'
+            preStop:  # 钩子在容器终止前立即被调用。
+              exec:   # 除 exec 还有 HttpGet 配置方式 Host、Path、Port
+                command:
+                - bash
+                - -c
+                - 'echo "preStart info" > /tmp/message'
           volumeMounts:     #挂载volumes中定义的磁盘
           - name: log-cache
             mount: /tmp/log
