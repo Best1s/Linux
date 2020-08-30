@@ -46,9 +46,11 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.3-0 k8s.
 或者 提前下载好 kubeadm config images list 中的镜像
 
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 #指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数   
+kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 #指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数
+
 ```
-# kubeadm init --config=kubeadm-config.yaml  --upload-certs   #多master 节点
+kubeadm init --config=kubeadm-config.yaml  --upload-certs   # 多master 节点
+```
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
 kubernetesVersion: stable
@@ -57,8 +59,8 @@ networking:
   podSubnet: "10.200.0.0/16"
   serviceSubnet: 10.50.0.0/12
 ```
-
-
+ 添加 kubectl 访问配置文件
+```
 
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -107,3 +109,16 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 kubectl get pods --all-namespaces
 ```
 **如果安装失败可执行kubeadm reset 再重新执行kubeadm init*
+
+
+
+对比
+```
+# join master node
+kubeadm join 192.168.x.xxx:16443 --token 19cfj3.18zez8y28w1alezz \
+    --discovery-token-ca-cert-hash sha256:bf2b19a56369f021546a747865a1e510a721518c817afc91d3abe84c5cbd114d \
+    --control-plane --certificate-key 62da85e24cbabe2fd1a8ce38a4912d02a8924821545c83b0f35387dd0503cbeb
+# join worker node
+kubeadm join 192.168.0.138:16443 --token 19cfj3.18zez8y28w1alezz \
+    --discovery-token-ca-cert-hash sha256:bf2b19a56369f021546a747865a1e510a721518c817afc91d3abe84c5cbd114d 
+```
