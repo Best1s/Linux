@@ -46,7 +46,19 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.3-0 k8s.
 或者 提前下载好 kubeadm config images list 中的镜像
 
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cluster-ip 10.233.0.0/16 #指定 pod service 网络段 pod段用于flannel 网络设置
+kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 #指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数   
+```
+# kubeadm init --config=kubeadm-config.yaml  --upload-certs   #多master 节点
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: ClusterConfiguration
+kubernetesVersion: stable
+controlPlaneEndpoint: "192.168.0.138:16443"
+networking:
+  podSubnet: "10.200.0.0/16"
+  serviceSubnet: 10.50.0.0/12
+```
+
+
 
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
