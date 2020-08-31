@@ -1,3 +1,6 @@
+文件数修改 
+ulimit -n 100001 && echo -e '* soft nofile 100001\n* hard nofile 100002\nroot soft nofile 100001\nroot hard nofile 100002' >> /etc/security/limits.conf && ulimit -n
+
 sysctl指令可在内核运行时动态地修改内核的运行参数
 1. 常见用法
 - 列出所有的变量并查看
