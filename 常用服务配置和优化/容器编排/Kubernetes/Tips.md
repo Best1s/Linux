@@ -4,6 +4,11 @@ kubectl重启某个pod或者强制停掉
 ```
 kubectl get pods PODNAME -n NAMESPACE -o yaml | kubectl replace --force -f -
 ```
+滚动更新重启,通过添加一个环境变量。
+```
+kubectl patch deployment <deployment-name> \
+  -p '{"spec":{"template":{"spec":{"containers":[{"name":"<container-name>","env":[{"name":"RESTART_","value":"'$(date +%s)'"}]}]}}}}'
+```
 同样的一个pod需要停掉执行命令
 ```
 kubectl get deployment -n NAMESPACE
