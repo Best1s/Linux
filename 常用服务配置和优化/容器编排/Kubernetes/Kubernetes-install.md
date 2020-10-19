@@ -121,4 +121,9 @@ kubeadm join 192.168.x.xxx:16443 --token 19cfj3.18zez8y28w1alezz \
 # join worker node
 kubeadm join 192.168.0.138:16443 --token 19cfj3.18zez8y28w1alezz \
     --discovery-token-ca-cert-hash sha256:bf2b19a56369f021546a747865a1e510a721518c817afc91d3abe84c5cbd114d 
+
+# 显示 control-plane key  
+kubeadm init phase upload-certs --upload-certs
+# 加入node 
+kubeadm token create --print-join-command
 ```
