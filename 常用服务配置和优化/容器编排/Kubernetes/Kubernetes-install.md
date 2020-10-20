@@ -39,7 +39,7 @@ echo -e '{\n  "registry-mirrors":["http://hub-mirror.c.163.com"],\n  "exec-opts"
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
  
 kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers 
-#指定安装源 指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数
+#指定安装源 指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --control-plane-endpoint  参数 指定 vip:port
 ```
 kubeadm init --config=kubeadm-config.yaml  --upload-certs   # 多master 节点
 ```
