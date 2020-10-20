@@ -34,20 +34,12 @@ echo -e '{\n  "registry-mirrors":["http://hub-mirror.c.163.com"],\n  "exec-opts"
 ```
 运行kubeadm init 安装master
 ```
-kubeadm config images pull --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers #指定安装源tag重命名解决镜像不能拉取问题
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy:v1.18.1 k8s.gcr.io/kube-proxy:v1.18.1
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager:v1.18.1 k8s.gcr.io/kube-controller-manager:v1.18.1
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.18.1 k8s.gcr.io/kube-apiserver:v1.18.1
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.18.1 k8s.gcr.io/kube-scheduler:v1.18.1
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.2 k8s.gcr.io/pause:3.2
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.7 k8s.gcr.io/coredns:1.6.7
-docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.3-0 k8s.gcr.io/etcd:3.4.3-0
-
 或者 提前下载好 kubeadm config images list 中的镜像
 
 echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 #指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数
-
+ 
+kubeadm init --pod-network-cidr 10.244.0.0/16  --service-cidr 10.233.0.0/16 --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers 
+#指定安装源 指定 pod service 网络段 pod段用于flannel 网络设置   单master 节点  多master 添加 --upload-certs 参数
 ```
 kubeadm init --config=kubeadm-config.yaml  --upload-certs   # 多master 节点
 ```
