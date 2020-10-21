@@ -26,7 +26,7 @@ $host					表示客户端请求头部中的Host字段，如果Host字段不存�
 
 $hostname				表示Nginx所在机器的名称
 
-$http_HREADER			表示当前HTTP请求中相应头部的值
+$http_HREADER			表示当前HTTP请求中相应头部的值    $http_userId   $http_token ...
 
 $sent_http_HERDER		表示返回客户端的HTTP响应中相应头部的值
 
