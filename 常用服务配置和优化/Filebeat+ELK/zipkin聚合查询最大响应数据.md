@@ -60,6 +60,7 @@ kql api
 }
 ```
 curl -s -XGET "http://xxxxx:9200/zipkin*/_search?pretty" -H 'Content-Type: application/json' -d @get_data.json > date.log
+
 python 处理 输出自己想要的值
 ```
 import json
