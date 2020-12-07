@@ -23,3 +23,6 @@ service-cluster 地址范围配置
 ```
 kube-apiserver 启动参数中加入 service-cluster-ip-range= x.x.x.x/x
 ```
+（ p.s. kubectl -v=6 可以显示所有 API 细节指令）
+etcd 小技巧：通过--etcd-servers-overrides可以将 Kubernetes Event 的资料写入作为切割，分不同机器处理，如下所示
+--etcd-servers-overrides=/events#https://0.example.com:2381;https://1.example.com:2381;https://2.example.com:2381
