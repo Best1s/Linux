@@ -34,3 +34,31 @@ index.routing.allocation.exclude.{attribute} 表示索引只能分配在不包�
   },
 ```
 配置索引声明周期并关联 logstash
+
+
+ES数据备份
+```
+# setting index backups path
+echo "path.repo: [\"/data/backups\"]">> /etc/elasticsearch/elasticsearch.yml
+
+# Create snapshot is my_back
+curl -XPUT http://127.0.0.1:9200/_snapshot/my_back -H 'content-Type:application/json' -d '{
+    "type": "fs",
+    "settings": {
+        "location": "/data/backups"
+    }
+}'
+
+# back index
+curl -XPUT http://127.0.0.1:9200/_snapshot/my_back/store_trend?wait_for_completion=true  -H 'content-Type:application/json' -d '{
+    "indices": "INDEX_NAME"
+}'
+```
+ES 数据恢复
+```
+# show backups index
+curl -XGET http://127.0.0.1:9200/_snapshot/my_back/_all
+
+# recover index
+curl -XPOST http://127.0.0.1:9200/_snapshot/my_back/INDEX_NAME/_restore
+```
