@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${appName}-svc
+  namespace: ${nameSpace}
+spec:
+  selector:
+    app: ${appName}
+  ports:
+  - port: ${port}
+    targetPort: ${port}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${appName}
+  namespace: ${nameSpace}
+spec:
+  replicas: ${repNum}
+  selector:
+    matchLabels:
+      app: ${appName}
+  template:
+    metadata:
+      labels:
+        app: ${appName}
+    spec:
+      containers:
+      - name: ${appName}
+        image: ${hubAddress}:${tag}
+        ports:
+        - containerPort: ${port}
+        resources:
+          requests:
+            cpu: 200m
+            memory: 200Mi
+          limits:
+            cpu: "1"
+            memory: 1024Mi
+        volumeMounts:
+          - name: nfs-pvc-log
+            mountPath: "/var/log/nginx"
+      restartPolicy: "Always"
+      volumes:
+      - name: nfs-pvc-log
+        persistentVolumeClaim:
+          claimName: ${logPath}

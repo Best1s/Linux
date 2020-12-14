@@ -1,0 +1,81 @@
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: ${appName}-svc
+#  namespace: ${nameSpace}
+#spec:
+#  selector:
+#    app: ${appName}
+#  ports:
+#  - port: ${port}
+#    targetPort: ${port}
+#---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${appName}
+  namespace: ${nameSpace}
+spec:
+  minReadySeconds: 60
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: ${repNum}
+  replicas: ${repNum}
+  selector:
+    matchLabels:
+      app: ${appName}
+  template:
+    metadata:  
+      labels:
+        app: ${appName}
+    spec:
+      hostAliases:
+      - ip: 192.168.1.163
+        hostnames:
+        - "pipihadoop"
+      containers:
+      - name: ${appName}
+        image: ${hubAddress}:${tag}
+        env:
+        - name: consul_ip
+          value: "${consul_ip}"
+        - name: consul_port
+          value: "${consul_port}"
+        - name: env
+          value: "${env_var}"
+        - name: active
+          value: "${active}"
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: instance_id
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - instance_ip="test"
+        resources:        
+          requests:
+            cpu: 128m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2048Mi
+        volumeMounts:
+          - name: nfs-pvc-log
+            mountPath: "/home"
+        volumeMounts:
+          - name: nfs-pvc-log
+            mountPath: "/home"
+      restartPolicy: "Always"
+      volumes:
+      - name: nfs-pvc-log
+        persistentVolumeClaim:
+          claimName: ${logPath}

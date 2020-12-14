@@ -1,0 +1,17 @@
+From openjdk:8
+# docker build  --build-arg jarname=$jarname  .
+# echo "docker build --build-arg jarname=$jarname --build-arg expandvar=$expandvar -t $hubAddress:$tag ."|bash
+# vat jarname is jar package name
+# set timezone
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo "Asia/Shanghai" > /etc/timezone
+ENV workdir /app/
+ARG jarname
+ARG expandvar
+ENV jarname ${jarname}
+ENV expandvar ${expandvar:-""}
+COPY ${jarname} ${workdir}
+WORKDIR ${workdir}
+ENV JAVA_OPTS "-Xms128m -Xmx512m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m"
+ENV agentjar "skywalking-agent.jar"
+CMD ["sh","-ec","exec java -Dtsf_consul_ip=$consul_ip -Dtsf_consul_port=$consul_port ${expandvar} ${JAVA_OPTS} -jar ${jarname}"]
