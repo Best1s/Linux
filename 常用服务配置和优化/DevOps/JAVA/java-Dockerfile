@@ -14,4 +14,4 @@ COPY ${jarname} ${workdir}
 WORKDIR ${workdir}
 ENV JAVA_OPTS "-Xms128m -Xmx512m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m"
 ENV agentjar "skywalking-agent.jar"
-CMD ["sh","-ec","exec java -Dtsf_consul_ip=$consul_ip -Dtsf_consul_port=$consul_port ${expandvar} ${JAVA_OPTS} -jar ${jarname}"]
+CMD ["sh","-ec","exec java -Dtsf_consul_ip=$consul_ip -Dtsf_consul_port=$consul_port -Dspring.cloud.consul.discovery.instanceId=$instance_id ${expandvar} ${JAVA_OPTS} -jar ${jarname}"]
