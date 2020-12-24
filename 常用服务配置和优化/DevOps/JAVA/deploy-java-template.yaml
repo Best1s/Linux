@@ -60,7 +60,18 @@ spec:
               command:
               - /bin/sh
               - -c
-              - instance_ip="test"
+              - curl -XPUT "$consul_ip:$consul_port/v1/agent/service/deregister/$instance_id" && sleep 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - curl -XGET --fail "$consul_ip:$consul_port/v1/agent/service/$instance_id"
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
         resources:        
           requests:
             cpu: 128m

@@ -28,6 +28,7 @@ templatesPath=$WORKSPACE/deploy-java-template.yaml
 commit=${GIT_COMMIT:0:8}
 export tag=$(date +%m%d-%H.%M.%m-$branch-$commit)
 export nameSpace=java-$branch
+export instance_id="\$instance_id"
 jarPaths=($(ls */target/*.jar))
 for module in ${!modules[*]}
 do
