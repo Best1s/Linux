@@ -1,0 +1,149 @@
+# Copyright 2017 Heptio Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eventrouter 
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: eventrouter 
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eventrouter 
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: eventrouter
+subjects:
+- kind: ServiceAccount
+  name: eventrouter
+  namespace: kube-system
+---
+apiVersion: v1
+data:
+  config.json: |-
+    {
+      "sink": "glog"
+    }
+kind: ConfigMap
+metadata:
+  name: eventrouter-cm
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: kube-system
+data:
+  filebeat-yml: |-
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      json.keys_under_root: true
+      json.overwrite_keys: true
+      json.add_error_key: true
+      paths:
+        - "/var/log/eventrouter/*.log"
+    processors:
+     - drop_fields:
+         fields:
+         - beat
+         - host
+         - input
+         - source
+         - offset
+         - prospector
+         - log.file.path    
+    #xpack.monitoring.enabled: true
+    #xpack.monitoring.elasticsearch:
+    #  hosts: [ "http://192.168.1.13:9200" ]
+    output.elasticsearch:
+      hosts: ["127.0.0.1:9200"]
+      index: "k8s-event-%{+yyyy.MM.dd}"
+    registry_file: /var/log/eventrouter/
+    #tail_files: true  #从文件的最后位置开始读取
+    setup.template.settings:
+      index.number_of_shards: 5
+      index.number_of_replicas: 0
+    setup.ilm.enabled: false
+    setup.template.name: "filebeat"
+    setup.template.pattern: "filebeat-*"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventrouter
+  namespace: kube-system
+  labels:
+    app: eventrouter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventrouter
+  template:
+    metadata:
+      labels:
+        app: eventrouter
+        tier: control-plane-addons
+    spec:
+      containers:
+        - name: kube-eventrouter
+          image: bestkkk/eventrouter:v1
+          imagePullPolicy: IfNotPresent
+          command:
+               - "/bin/sh"
+          args:
+               - "-c"
+               - "/app/eventrouter -v 3 -logtostderr >> /var/log/eventrouter/eventrouter.log" 
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/eventrouter
+          - name: log-path
+            mountPath: /var/log/eventrouter
+        - name: filebeat
+          image: bestkkk/filebeat:v1
+#          image: docker.elastic.co/beats/filebeat:7.7.1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "filebeat -e -c /etc/filebeat/filebeat-yml"
+          volumeMounts:
+          - name: filebeat-config
+            mountPath: /etc/filebeat/filebeat-yml
+            subPath: filebeat-yml
+          - name: log-path
+            mountPath: /var/log/eventrouter
+      serviceAccount: eventrouter
+      volumes:
+        - name: config-volume
+          configMap:
+            name: eventrouter-cm
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+        - name: log-path
+          emptyDir: {}

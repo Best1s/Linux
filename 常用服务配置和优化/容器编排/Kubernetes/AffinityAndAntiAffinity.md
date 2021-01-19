@@ -1,3 +1,4 @@
+nodeSelector是硬性要求，亲和与反亲和支持软硬两种要求。
 ```
 Affinity:  #(亲和性)
   nodeAffinity:
@@ -57,3 +58,21 @@ spec:
 6.如果labelSelector和topologyKey同级，还可以定义namespaces列表，表示匹配哪些namespace里面的pod，默认情况下，会匹配定义的pod所在的namespace，如果定义了这个字段，但是它的值为空，则匹配所有的namespaces。
 
 7.所有关联requiredDuringSchedulingIgnoredDuringExecution的matchExpressions全都满足之后，系统才能将pod调度到某个node上。
+
+
+污点：
+设置污点：
+
+
+      kubectl taint node [node] key=value[effect]   
+
+      其中[effect] 可取值： [ NoSchedule | PreferNoSchedule | NoExecute ]
+
+       NoSchedule ：一定不能被调度。
+
+       PreferNoSchedule：尽量不要调度。
+
+       NoExecute：不仅不会调度，还会驱逐Node上已有的Pod。
+
+       示例：kubectl taint node 10.10.0.111 node=111:NoSchedule
+

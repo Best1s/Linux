@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-webhook-dingtalk-svc
+  namespace: prometheus
+spec:
+  selector:
+    app: prometheus-webhook-dingtalk
+  ports:
+  - port: 18060
+    targetPort: 8060
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-webhook-config
+  namespace: prometheus
+data:
+  #https://github.com/timonwong/prometheus-webhook-dingtalk
+  config.yml: |-
+    targets:
+      test_evn_alert:
+        url: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxx
+        secret: SEC0000000000A
+      webhook2:
+        url: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxx
+      webhook_legacy:
+        url: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxx
+        message:
+          title: '{{ template "legacy.title" . }}'
+          text: '{{ template "legacy.content" . }}'
+      webhook_mention_all:
+        url: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxx
+        mention:
+          all: true
+      webhook_mention_users:
+        url: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxx
+        mention:
+          mobiles: ['156xxxx8827', '189xxxx8325']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-webhook-dingtalk
+  namespace: prometheus
+  labels:
+    app: prometheus-webhook-dingtalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-webhook-dingtalk
+  template:
+    metadata:
+      labels:
+        app: prometheus-webhook-dingtalk
+    spec:
+      containers:
+        - name: prometheus-webhook-dingtalk
+          image: timonwong/prometheus-webhook-dingtalk
+          volumeMounts:
+          - name: prometheus-webhook-config
+            mountPath: /etc/prometheus-webhook-dingtalk/config.yml
+            subPath: config.yml
+          resources:        
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 1024Mi
+      volumes:
+        - name: prometheus-webhook-config
+          configMap:
+            name: prometheus-webhook-config

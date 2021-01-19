@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tools
+---
+# docker rmi `docker images -q` > /dev/null 2>&1 &
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: del-images
+  name: del-images
+  namespace: tools
+spec:
+  selector:
+    matchLabels:
+      k8s-app: del-images
+  template:
+    metadata:
+      labels:
+        k8s-app: del-images
+    spec:
+      containers:
+      - name: del-images
+        image: busybox
+        command:
+             - "/bin/sh"
+        args:
+             - "-c"
+             - "docker images |awk '/ccr.ccs/{print $3}'|xargs docker rmi && sleep 100 || sleep 100"
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 250m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        volumeMounts:
+        - name: docker
+          mountPath: "/bin/docker"
+        - name: docker-socket
+          mountPath: "/var/run/docker.sock"
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      volumes:
+      - hostPath:
+          path: /usr/bin/docker
+        name: docker
+      - hostPath:
+          path: /var/run/docker.sock
+        name: docker-socket
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 25%
+    type: RollingUpdate
