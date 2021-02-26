@@ -19,7 +19,7 @@ java-Dockerfile
 Generic Webhook Trigger:
 BRANCH	$.ref
 user_name	$.user_name
-comMsg	$.commits[0].message
+comMsg	$.commits[-1:].message
 webhook Cause: $user_name committed to $BRANCH  comMsg: $comMsg
 
 Build: clean $build_module package  -DskipTests
