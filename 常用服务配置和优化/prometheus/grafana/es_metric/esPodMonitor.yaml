@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+    name: es-exporter
+    namespace: monitoring
+spec:
+    namespaceSelector:
+      matchNames:
+      - monitoring
+    podMetricsEndpoints:
+    - interval: 30s
+      path: /metrics
+      port: metric-port
+    selector:
+      matchLabels:
+        exporter: es-exporter

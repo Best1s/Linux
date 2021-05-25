@@ -1,0 +1,8 @@
+# 采集任务配置详情见 https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config
+job_name: demo
+metrics_path: /metrics
+scheme: http
+static_configs:
+  - targets:
+    - <ip:port>
+    - <ip:port>

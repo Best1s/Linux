@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  # 填写一个唯一名称
+  name: podmonitor-demo
+  # namespace
+  namespace: cm-prometheus
+spec:
+  podMetricsEndpoints:
+  - interval: 30s
+    # 填写pod yaml中Prometheus Exporter对应的Port的Name
+    port: http-metrics
+    # 填写Prometheus Exporter对应的Path的值，不填默认/metrics
+    path: /metrics
+  # 选择要监控pod所在的namespace
+  namespaceSelector:
+    matchNames:
+    - yourNamespace 
+  # 填写要监控pod的Label值，以定位目标pod
+  selector:
+    matchLabels:
+      app: demo-app

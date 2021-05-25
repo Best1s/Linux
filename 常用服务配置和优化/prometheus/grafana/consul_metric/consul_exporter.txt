@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-consul-exporter-svc
+  namespace: exporter
+spec:
+  selector:
+    app: test-consul-exporter
+  ports:
+  - port: 9107
+    targetPort: 9107
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-consul-exporter
+  annotations:
+     kubernetes.io/change-cause: "init dev consul"
+  namespace: exporter
+spec:
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-consul-exporter
+  template:
+    metadata:  
+      labels:
+        app: test-consul-exporter
+    spec:
+      containers:
+      - name: test-consul-exporter
+        image: consul-exporter:latest
+        ports:
+        - containerPort: 9107
+        env:
+        - name: --consul.server
+          value: "192.168.1.20:8500"
+        - name: instance_id
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+#        command: ["/bin/consul_exporter","--consul.server=192.168.1.20:8500"]
+        args: ["--consul.server=192.168.0.101:8500"]
+        livenessProbe:
+          tcpSocket:
+            port: 9107
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        readinessProbe:
+          tcpSocket:
+            port: 9107
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources:        
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi

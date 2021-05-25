@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: es-exporter1-32
+  namespace: monitoring
+  labels:
+    exporter: es-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      exporter: es-exporter
+  template:
+    metadata:
+      labels:
+        exporter: es-exporter
+    spec:
+      containers:
+      - env:
+          - name: ES_URI
+            valueFrom:
+              secretKeyRef:
+                name: es-secret1-32
+                key: esURI
+          - name: ES_ALL
+            value: "true"
+        image: elasticsearch-exporter:latest
+        imagePullPolicy: IfNotPresent
+        name: es-exporter1-32
+        ports:
+        - containerPort: 9114
+          name: metric-port
+        securityContext:
+          privileged: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

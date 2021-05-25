@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter192.168.1.27
+  labels:
+    exporter: redis-exporter
+  annotations:
+     kubernetes.io/change-cause: "init  192.168.1.27:7000 redis export"
+  namespace: monitoring
+spec:
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter1-27
+  template:
+    metadata:  
+      labels:
+        app: redis-exporter1-27
+        exporter: redis-exporter
+    spec:
+      containers:
+      - name: redis-exporter192-168-1-27
+        image: redis_exporter:latest
+        ports:
+        - containerPort: 9121
+          name: http
+        env:
+        args: ["--redis.addr","redis://192.168.1.27:7001","--redis.password","xxx"]
+        livenessProbe:
+          tcpSocket:
+            port: 9121
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        readinessProbe:
+          tcpSocket:
+            port: 9121
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources:        
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi

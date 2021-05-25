@@ -1,0 +1,30 @@
+#Spring Boot 接入 https://cloud.tencent.com/document/product/248/49086
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: java-actuator
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 10s
+    path: /actuator/prometheus
+    port: actuator
+    relabelings:
+    - action: replace
+      regex: (.*)
+      replacement: $1
+      sourceLabels:
+      - __meta_kubernetes_service_name
+      targetLabel: instance
+    - action: replace
+      regex: prod
+      replacement: prod
+      sourceLabels:
+      - __meta_kubernetes_namespace
+      targetLabel: env
+  namespaceSelector:
+    matchNames:
+    - prod
+  selector:
+    matchLabels:
+      actuator: "true"

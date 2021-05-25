@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  # 填写一个唯一名称
+  name: servicemonitor-demo
+  # namespace
+  namespace: prometheus
+spec:
+  endpoints:
+  - interval: 30s
+    # 填写service yaml中Prometheus Exporter对应的Port的Name
+    port: http-metrics
+    # 填写Prometheus Exporter对应的Path的值，不填默认/metrics
+    path: /metrics
+  # 选择要监控service所在的namespace
+  namespaceSelector:
+    matchNames:
+    - yourNamespace 
+  # 填写要监控service的Label值，以定位目标service
+  selector:
+    matchLabels:
+      app: demo-app
