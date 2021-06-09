@@ -110,3 +110,14 @@ crontab 加锁
 
 文件锁使用独占锁，如果锁定则失败不等待。这样当任务未执行完成，下一任务判断到test.lock被锁定，则结束当前的任务，下一周期再判断。参数为-xn
 ```
+
+
+docker  USER redis
+# 设置时区。
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime  # ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo Asia/Shanghai > /etc/timezone
+
+
+perf record -F 99 -p 873 -g -- sleep 30
+
+mysql  查看当前用户权限  SHOW GRANTS;

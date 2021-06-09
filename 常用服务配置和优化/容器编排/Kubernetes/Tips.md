@@ -76,3 +76,16 @@ space.ExternalTrafficPolicy: Cluster | Local
 能够保留来源IP，并可以保证公网、VPC内网访问（LoadBalancer）和主机端口访问（NodePort）模式下流量仅在本节点转发。Local转发使部分没有业务Pod存在的节点健康检查失败，可能存在流量不均衡的转发的风险。
 
 docker  USER redis  #使用redis 用户运行 redis 用户必须存在容器
+
+
+
+查看证书有效期 ```kubeadm alpha certs check-expiration```
+
+证书```kubeadm alpha certs renew all```
+
+通过crontab定时更新证书 ```0 0 15 10 * kubeadm alpha certs renew all```
+
+证书过期kubectl命令无法使用
+
+更新客户端配置：```/usr/bin/cp /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config```
