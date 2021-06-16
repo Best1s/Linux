@@ -1,0 +1,11 @@
+1、本地jar打包到本地仓库
+
+有源码的情况下，定义好 pom 文件，直接执行 mvn deploy 
+
+2、本地jar上传到私服
+
+1）、可以登录私服，导入jar (未找到)
+
+2）、使用命令上传
+
+mvn deploy:deploy-file -Dfile=jar包  -DgroupId=groupID  -DartifactId=artifacid  -Dversion=版本号 -Dpackaging=jar -Durl=xx   -DrepositoryId=xxx
