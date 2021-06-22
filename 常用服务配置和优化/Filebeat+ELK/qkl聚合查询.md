@@ -39,3 +39,27 @@ GET filebeat-7.3.2/_search
     }
 }
 ```
+
+```
+按x.keyword 分组 统计 id 并去重
+GET index/_search
+{
+  "size": 0,
+  "aggs": {
+    "xxx_group": {
+      "terms": {
+        "field": "x.keyword"
+      },
+      "aggs": {
+        "account_xxx": {
+          "cardinality": {
+            "field": "id"
+          }
+        }
+      
+      }
+    }
+  }
+}
+```
+
