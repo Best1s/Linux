@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: canal-admin
+    qcloud-app: canal-admin
+  name: canal-admin
+  namespace: canal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: canal-admin
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: -canal-admin
+    spec:
+      containers:
+      - env:
+        - name: spring.datasource.address
+          valueFrom:
+            configMapKeyRef:
+              key: spring.datasource.address
+              name: canal-admin-application
+              optional: false
+        - name: spring.datasource.database
+          valueFrom:
+            configMapKeyRef:
+              key: spring.datasource.database
+              name: canal-admin-application
+              optional: false
+        - name: spring.datasource.password
+          valueFrom:
+            configMapKeyRef:
+              key: spring.datasource.password
+              name: canal-admin-application
+              optional: false
+        - name: spring.datasource.username
+          valueFrom:
+            configMapKeyRef:
+              key: spring.datasource.username
+              name: canal-admin-application
+              optional: false
+        image: canal/canal-admin
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8089
+          timeoutSeconds: 3
+        name: canal-admin
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8089
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+

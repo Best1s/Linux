@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  spring.datasource.address: x.x.x.x:3306  #外部数据库,如果没有可以不用此变量
+  spring.datasource.database: canal_manager
+  spring.datasource.password: xxxxx
+  spring.datasource.username: canal
+kind: ConfigMap
+metadata:
+  name: canal-admin-application
+  namespace: canal

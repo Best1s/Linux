@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: canal-admin-svc
+  namespace: canal
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: 8089-8089-tcp
+    nodePort: 30516
+    port: 8089
+    protocol: TCP
+    targetPort: 8089
+  selector:
+    k8s-app: canal-admin
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+  type: LoadBalancer

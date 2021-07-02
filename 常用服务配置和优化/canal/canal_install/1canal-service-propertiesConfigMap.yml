@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  canal.admin.manager: canal-admin.default.svc.cluster.local:8089   #canal-admin 地址
+  canal.admin.register.cluster: canal-k8s      #注册集群的名称
+kind: ConfigMap
+metadata:
+  name: canal-service-properties
+  namespace: canal

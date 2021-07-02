@@ -1,0 +1,65 @@
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: canal-server
+  name: canal-server
+  namespace: canal
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: pro-canal-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: canal-server
+        qcloud-app: canal-server
+    spec:
+      containers:
+      - env:
+        - name: canal.admin.manager     #canal-admin 服务地址
+          valueFrom:
+            configMapKeyRef:
+              key: canal.admin.manager
+              name: canal-service-properties
+              optional: false
+        - name: canal.admin.register.cluster
+          valueFrom:
+            configMapKeyRef:
+              key: canal.admin.register.cluster
+              name: canal-service-properties
+              optional: false
+        image: canal/canal-server:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 11110
+          timeoutSeconds: 3
+        name: canal-server
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 11110
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: 250m
+            memory: 2Gi
+      restartPolicy: Always
