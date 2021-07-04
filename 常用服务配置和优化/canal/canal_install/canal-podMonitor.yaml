@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: canal-metrics
+  namespace: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+    - canal
+  podMetricsEndpoints:
+  - interval: 10s
+    path: /metrics
+    port: canal-metrics
+    relabelings:
+    - action: replace
+      regex: canal
+      replacement: canal   #命名空间区分环境
+      sourceLabels:
+      - __meta_kubernetes_namespace
+      targetLabel: env
+  selector:
+    matchLabels:
+      k8s-app: canal-server

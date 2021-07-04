@@ -2,13 +2,13 @@
 
 依赖: 需要提前部署  zookeeper，可使用 helm 安装 （需要准备 Storageclass）
 
-zookeeper:
+zookeeper: [charts/bitnami/zookeeper at master · bitnami/charts (github.com)](https://github.com/bitnami/charts/tree/master/bitnami/zookeeper)
 
 ```
 helm install -n canal zookeeper/Chart.yml
 ```
 
-部署 canal-admin  canal-deploy
+部署 canal-admin  canal-deploy  [alibaba/canal: 阿里巴巴 MySQL binlog 增量订阅&消费组件 (github.com)](https://github.com/alibaba/canal)
 
 ```shell
 kubectl apply -f canal_install
