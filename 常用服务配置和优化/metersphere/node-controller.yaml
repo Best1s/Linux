@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ms-node-controller
+  namespace: ms
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: ms-node-controller
+  template:
+    metadata:  
+      labels:
+        app: ms-node-controller
+    spec:
+      containers:
+      - name: node-controller
+        image: x.x.x.x/test-ms/ms-node-controller:0824-10.47.08-dev-511ada8f
+        resources: 
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2048Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8082
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 50
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8082
+          timeoutSeconds: 1
+        volumeMounts:
+          - mountPath: "/run/docker.sock"
+            name: "volume-3"
+            readOnly: false
+          - mountPath: "/usr/bin/docker"
+            name: "volume-2"
+            readOnly: false
+      - args:
+        - --web.listen-address=0.0.0.0:9100
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --path.rootfs=/host/root
+        - --no-collector.wifi
+        - --no-collector.hwmon
+        - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)
+        image: x.x.x.x/prometheus/node-exporter:v0.18.1
+        name: node-exporter
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9100
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 50
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9100
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /host/proc
+          name: proc
+          readOnly: false
+        - mountPath: /host/sys
+          name: sys
+          readOnly: false
+        - mountPath: /host/root
+          mountPropagation: HostToContainer
+          name: root
+          readOnly: true
+      volumes:
+#      - name: ms-properties
+#        configMap:
+#          name: ms-properties
+      - name: volume-2
+        hostPath:
+         path: "/usr/bin/docker"
+      - name: volume-3
+        hostPath:
+         path: "/run/docker.sock"
+      - hostPath:
+          path: /proc
+        name: proc
+      - hostPath:
+          path: /sys
+        name: sys
+      - hostPath:
+          path: /
+        name: root

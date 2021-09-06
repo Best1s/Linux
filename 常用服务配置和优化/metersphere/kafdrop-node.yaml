@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafdrop-svc
+  namespace: default
+spec:
+  selector:
+    app: kafdrop
+  ports:
+  - port: 9000
+    targetPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafdrop
+  namespace: default
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafdrop
+  template:
+    metadata:  
+      labels:
+        app: kafdrop
+    spec:
+      containers:
+      - name: kafdrop
+        env:
+        - name: KAFKA_BROKERCONNECT
+          value: 'x.x.x.x:19092'
+        - name: JVM_OPT
+          value: '-Xms320M -Xmx640M'
+        - name: SERVER_SERVLET_CONTEXTPATH
+          value: '/'
+        image: x.x.x.x/kafka/kafdrop
+        resources: 
+            requests:
+              cpu: 200m
+              memory: 212Mi
+            limits:
+              cpu: "1"
+              memory: 1024Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9000
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 50
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9000
+          timeoutSeconds: 1

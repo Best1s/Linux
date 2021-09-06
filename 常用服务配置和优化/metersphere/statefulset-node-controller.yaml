@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ms-node-controller
+  namespace: ms
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  updateStrategy:
+    type: RollingUpdate
+#    rollingUpdate:
+  replicas: 5
+  serviceName: ms-node-controller-headless
+  selector:
+    matchLabels:
+      app: ms-node-controller
+  template:
+    metadata:  
+      labels:
+        app: ms-node-controller
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - ms-node-controller
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: node-controller
+        image: 
+#        imagePullPolicy: Always
+        lifecycle: 
+          postStart: 
+            exec: 
+              command: ["/bin/sh", "-c", 'sed   "/127.0/a127.0.0.1 $HOSTNAME" /etc/hosts >> /tmp/hosts && cat /tmp/hosts > /etc/hosts']
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+        resources: 
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2049Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8082
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8082
+          timeoutSeconds: 1
+        volumeMounts:
+          - mountPath: "/run/docker.sock"
+            name: "volume-3"
+            readOnly: false
+      - args:
+        - --web.listen-address=0.0.0.0:9100
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --path.rootfs=/host/root
+        - --no-collector.wifi
+        - --no-collector.hwmon
+        - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)
+        image: x.x.x.x/prometheus/node-exporter:v0.18.1
+        name: node-exporter
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9100
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 50
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9100
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /host/proc
+          name: proc
+          readOnly: false
+        - mountPath: /host/sys
+          name: sys
+          readOnly: false
+        - mountPath: /host/root
+          mountPropagation: HostToContainer
+          name: root
+          readOnly: true
+      volumes:
+#      - name: ms-properties
+#        configMap:
+#          name: ms-properties
+      - name: volume-3
+        hostPath:
+         path: "/run/docker.sock"
+      - hostPath:
+          path: /proc
+        name: proc
+      - hostPath:
+          path: /sys
+        name: sys
+      - hostPath:
+          path: /
+        name: root

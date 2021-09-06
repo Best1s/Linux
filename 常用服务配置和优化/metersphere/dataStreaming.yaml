@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-data-streaming
+  namespace: ms
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-data-streaming
+  template:
+    metadata:  
+      labels:
+        app: ms-data-streaming
+    spec:
+      containers:
+      - name: data-streaming
+        #image: 192.168.0.134/test-ms/ms-data-streaming:dev-7305e5
+        image: metersphere/ms-data-streaming:v1.11.3
+#        imagePullPolicy: Always
+        resources: 
+            requests:
+              cpu: 200m
+              memory: 1024Mi
+            limits:
+              cpu: "2"
+              memory: 2048Mi
+        volumeMounts:
+          - name: ms-properties
+            mountPath: "/opt/metersphere/conf/metersphere.properties"
+            subPath: "metersphere.properties"
+      volumes:
+      - name: ms-properties
+        configMap:
+          name: ms-properties

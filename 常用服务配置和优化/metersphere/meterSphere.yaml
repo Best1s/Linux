@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-metersphere-svc
+  namespace: ms
+spec:
+  selector:
+    app: ms-metersphere
+  ports:
+  - port: 8081
+    targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-metersphere
+  namespace: ms
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-metersphere
+  template:
+    metadata:  
+      labels:
+        app: ms-metersphere
+    spec:
+      containers:
+      - name: metersphere
+        image: x.x.x.x/test-ms/metersphere:master-bab3a881
+#        imagePullPolicy: Always
+        resources: 
+            requests:
+              cpu: 200m
+              memory: 1023Mi
+            limits:
+              cpu: "2"
+              memory: 2048Mi
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8081
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 50
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8081
+          timeoutSeconds: 1
+        volumeMounts:
+          - name: ms-properties
+            mountPath: "/opt/metersphere/conf/metersphere.properties"
+            subPath: "metersphere.properties"
+          - mountPath: "/run/docker.sock"
+            name: "volume-3"
+            readOnly: false
+          - mountPath: "/usr/bin/docker"
+            name: "volume-2"
+            readOnly: false
+      volumes:
+      - name: ms-properties
+        configMap:
+          name: ms-properties
+      - name: volume-2
+        hostPath:
+         path: "/usr/bin/docker"
+      - name: volume-3
+        hostPath:
+         path: "/run/docker.sock"
