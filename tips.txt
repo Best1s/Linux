@@ -121,3 +121,6 @@ RUN echo Asia/Shanghai > /etc/timezone
 perf record -F 99 -p 873 -g -- sleep 30
 
 mysql  查看当前用户权限  SHOW GRANTS;
+
+yum -y install epel-release  #Extra Packages for Enterprise Linux
+ldd 查看软件依赖 libraiy   eg: ldd /bin/sshd
