@@ -124,3 +124,18 @@ mysql  查看当前用户权限  SHOW GRANTS;
 
 yum -y install epel-release  #Extra Packages for Enterprise Linux
 ldd 查看软件依赖 libraiy   eg: ldd /bin/sshd
+
+yaml中|、|-、>的区别
+|： 代表每一行的末尾都会添加一个换行符\n
+|-：和|一样，但是最后一行不添加换行符\n
+>： 只在最后一行添加换行符\n
+
+nindent和indent的区别：nindent会在缩进前多出一个换行符
+
+跨域快速测试
+打开开发者工具F12   var xhr = new XMLHttpRequest();xhr.open('GET', 'https://soulchild.cn');xhr.send(null);
+
+git submodule
+拉取项目后  拉取子模块 git submodule update --init --recursive
+
+nginx.ingress.kubernetes.io/cors-allow-headers: '*'  不支持* 需要单独写
